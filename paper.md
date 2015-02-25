@@ -31,7 +31,7 @@ The success of spreadsheets is of course due to many different factors, the ubiq
 
 Spreadsheets are formally defined as a collection of worksheets, which in turn can contain cells. These cells can contain values, like numbers or text, or formulas, with calculations and cell references. In addition to these basic operations, many spreadsheet systems also allow users to create charts, graphs and pivot tables. When a user enters or updates a formula, the result is immediately shown to the user. Also, all cells depending on the changed formula are updated. 
 
-From interviews with users we know that this liveness is important to users. They often start building a spreadsheet with the end goal in mind, and manipulate the formulas until the obtain the result they want.
+From interviews with users we know that this _liveness_ is important to users. They often start building a spreadsheet with the end goal in mind, and manipulate the formulas until the obtain the result they want.
 
 # Moving forward
 
@@ -47,10 +47,17 @@ While it is possible to have spreadsheet systems like Excel calculate fix points
 
 ## Spreadsheets properties for regular languages
 
-
 # Related Work
 
+## Modeling spreadsheets
+Prviously, work has been done that attempted to raise the abstraction level of spreadsheets. Abraham _et al._ for example, have developed a system called ClassSheets [@Abra2005, Enge2005] with which the design of a spreadsheet can be described. From this specification, spreadsheets can be generated. A related effort is the work of Cunha, which transforms a spreadsheet into a database by analyzing functional dependencies[@Cunh2009]. While evaluations showed that this systems makes users more efficient and effective, the authors also conclude that ``that deeper insight on the spreadsheet models is required to maximize effectiveness''[@Beckw2011]. 
+
 # Conclusion
-This paper describes the liveness properties of spreadsheets and how they contribute to the mainstream success of spreadsheets. In addtion, directions are presented to  both move spreadsheets forward and to encorporate the success factors into regular programming languages.
+This paper describes the liveness properties of spreadsheets and how they contribute to the mainstream success of spreadsheets. In addtion, directions are presented to  both move spreadsheets forward and to encorporate the success factors into regular programming languages. as such, the contributions of this paper are as follows:
+
+* An detailed overview of _live_ properties of spreadsheets and their inpact on users
+* Two distinct directions for the advancement of spreadsheet live programing succes:
+	1. More power for spreadsheets
+	2. Spreadsheets properties for regular languages
 
 # References
