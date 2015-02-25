@@ -23,9 +23,9 @@ bibliography: references.bib
 
 # Introduction
 
-Spreadsheet systems can easily be considered the most succesful form of programming. Winston~\cite{Wins2001} estimates that 90\% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modeling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko~\cite{Pank2006} estimates that 95\% of U.S. firms, and 80\% in Europe, use spreadsheets in some form for financial reporting.
+Spreadsheet systems can easily be considered the most succesful form of programming. Winston [@Wins2001] estimates that 90% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modeling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko[@Pank2006] estimates that 95% of U.S. firms, and 80% in Europe, use spreadsheets in some form for financial reporting.
 
-The success of spreadsheets is of course due to many different factors, the ubiquitous Microsoft Office suite within companies provides almost every office worker with a version of Excel, the world's most popular spreadsheet system. However, researchers have also argued that the \emph{liveness} of spreadsheets has contributed to the widespread success of spreadsheets [@thesisFelienne].
+The success of spreadsheets is of course due to many different factors, the ubiquitous Microsoft Office suite within companies provides almost every office worker with a version of Excel, the world's most popular spreadsheet system. However, researchers have also argued that the liveness of spreadsheets has contributed to the widespread success of spreadsheets [@thesisFelienne].
 
 # Live programming in Spreadsheets
 
