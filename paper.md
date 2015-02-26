@@ -23,7 +23,7 @@ bibliography: references.bib
 
 # Introduction
 
-Spreadsheet systems can easily be considered the most succesful form of programming. Winston [@Wins2001] estimates that 90% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modeling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko[@Pank2006] estimates that 95% of U.S. firms, and 80% in Europe, use spreadsheets in some form for financial reporting.
+Spreadsheet systems can easily be considered the most successful form of programming. Winston [@Wins2001] estimates that 90% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modelling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko[@Pank2006] estimates that 95% of U.S. firms, and 80% in Europe, use spreadsheets in some form for financial reporting.
 
 The success of spreadsheets is of course due to many different factors, the ubiquitous Microsoft Office suite within companies provides almost every office worker with a version of Excel, the world's most popular spreadsheet system. However, researchers have also argued that the liveness of spreadsheets has contributed to the widespread success of spreadsheets [@thesisFelienne].
 
@@ -41,7 +41,7 @@ From interviews with users we know that this _liveness_ is important to users. T
 Despite their widespread success, there are some limitations to spreadsheets. Previous work [@Jone2003] has described the idea of allowing users to add user-defined functions (UDFs) with spreadsheet formula syntax. This seems to be a powerful addition that unfortunately has not made it so common spreadsheet implementations yet. Of course, UDFs can already be implemented with Visual Basic for Applications in Excel, however, this breaks the concept of liveness as the VBA code has to be compiled. Furthermore, also the directness property [@Malo95] is somewhat lost as the VBA code has to be edited in a separate window.
 
 ### Loops and fixed points
-While it is possible to have spreadsheet systems like Excel calculate fix points, currently, users need to enable special settings to achieve this, as shown in Figure 1. Spreadsheet systems would be more powerful if such features would be expressable with formula syntac rather that with options.
+While it is possible to have spreadsheet systems like Excel calculate fix points, currently, users need to enable special settings to achieve this, as shown in Figure 1. Spreadsheet systems would be more powerful if such features would be expressible with formula syntax rather that with options.
 
 ![*Excel 2010 for Windows showing the property which enables iterative calculation*](images/iterative.PNG)
 
@@ -49,14 +49,15 @@ While it is possible to have spreadsheet systems like Excel calculate fix points
 
 # Related Work
 
+
 ## Modeling spreadsheets
-Prviously, work has been done that attempted to raise the abstraction level of spreadsheets. Abraham _et al._ for example, have developed a system called ClassSheets [@Abra2005, Enge2005] with which the design of a spreadsheet can be described. From this specification, spreadsheets can be generated. A related effort is the work of Cunha, which transforms a spreadsheet into a database by analyzing functional dependencies[@Cunh2009]. While evaluations showed that this systems makes users more efficient and effective, the authors also conclude that ``that deeper insight on the spreadsheet models is required to maximize effectiveness''[@Beckw2011]. 
+Previously, work has been done that attempted to raise the abstraction level of spreadsheets. Abraham _et al._ for example, have developed a system called ClassSheets [@Abra2005, Enge2005] with which the design of a spreadsheet can be described. From this specification, spreadsheets can be generated. A related effort is the work of Cunha, which transforms a spreadsheet into a database by analyzing functional dependencies[@Cunh2009]. While evaluations showed that this systems makes users more efficient and effective, the authors also conclude that ``that deeper insight on the spreadsheet models is required to maximize effectiveness''[@Beckw2011]. 
 
 # Conclusion
-This paper describes the liveness properties of spreadsheets and how they contribute to the mainstream success of spreadsheets. In addtion, directions are presented to  both move spreadsheets forward and to encorporate the success factors into regular programming languages. as such, the contributions of this paper are as follows:
+This paper describes the liveness properties of spreadsheets and how they contribute to the mainstream success of spreadsheets. In addtion, directions are presented to  both move spreadsheets forward and to incorporate the success factors into regular programming languages. as such, the contributions of this paper are as follows:
 
-* An detailed overview of _live_ properties of spreadsheets and their inpact on users
-* Two distinct directions for the advancement of spreadsheet live programing succes:
+* An detailed overview of _live_ properties of spreadsheets and their impact on users
+* Two distinct directions for the advancement of spreadsheet live programming success:
 	1. More power for spreadsheets
 	2. Spreadsheets properties for regular languages
 
