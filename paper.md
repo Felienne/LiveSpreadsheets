@@ -48,13 +48,23 @@ While it is possible to have spreadsheet systems like Excel calculate fix points
 ## Spreadsheets properties for regular languages
 
 # Related Work
+Related work for this paper comes in different categories, that we will summarize in this section.
 
+## Improving spreadsheets
+First of all, there are other papers aiming at improving spreadsheets, for instance by raining the level of abstraction. An example of this is the work of Abraham _et al._ for example, have developed a system called ClassSheets [@Abra2005, Enge2005] with which the design of a spreadsheet can be described. From this specification, spreadsheets can be generated. A related effort is the work of Cunha, which transforms a spreadsheet into a database by analyzing functional dependencies[@Cunh2009]. While evaluations showed that this systems makes users more efficient and effective, the authors also conclude that ``that deeper insight on the spreadsheet models is required to maximize effectiveness''[@Beckw2011]. 
 
-## Modeling spreadsheets
-Previously, work has been done that attempted to raise the abstraction level of spreadsheets. Abraham _et al._ for example, have developed a system called ClassSheets [@Abra2005, Enge2005] with which the design of a spreadsheet can be described. From this specification, spreadsheets can be generated. A related effort is the work of Cunha, which transforms a spreadsheet into a database by analyzing functional dependencies[@Cunh2009]. While evaluations showed that this systems makes users more efficient and effective, the authors also conclude that ``that deeper insight on the spreadsheet models is required to maximize effectiveness''[@Beckw2011]. 
+Other directions for improvement have been the by enhancing the interface with units of calculation. Abraham and Erwig for example, have written a series of articles on unit inference[@Abra2004, @Abra2006, @Abra2007}. Their units form a type system based on values in the spreadsheet, which is subsequently used to determine whether all cells in a column or row have the same type, improving the safety of the spreadsheet under test. Ahmad _et al._ [@Ahma2003] also created a system to annotate spreadsheets, however their approach requires users to indicate the types of fields themselves, hence significantly chaining the user experience.
+
+Finally, there are related works that aim to improve spreadsheets by adding various forms of error and 'smell' detection. We ourselves have worked on spreadsheet smells in previous work [@herm2012icse,@hermans2012icsm]. In those papers we have explored both spreadsheet smells at the low level of formulas as in a spreadsheets structure. Recently, other work on spreadsheet smells has been published[@cunh2012] that aims to find smells in values, such as typographical errors and values that do not follow the normal distribution. Related is the recent work by Barowy _et al.__ who created CheckCell, a data debugging tool that finds errors or suspicious values in Excel [@Baro2014].
+
+While all the above directions for improvement have their merits, demonstrated with empirical evidence, they do not specifically focus on retaining or even improving the 'live' properties of spreadsheets like we propose.
+
+## Improving spreadsheets
+Another category of related work explores the possibility of transferring live properties, as common in spreadsheets.... 
+
 
 # Conclusion
-This paper describes the liveness properties of spreadsheets and how they contribute to the mainstream success of spreadsheets. In addtion, directions are presented to  both move spreadsheets forward and to incorporate the success factors into regular programming languages. as such, the contributions of this paper are as follows:
+This paper describes the liveness properties of spreadsheets and how they contribute to the mainstream success of spreadsheets. In addition, directions are presented to  both move spreadsheets forward and to incorporate the success factors into regular programming languages. as such, the contributions of this paper are as follows:
 
 * An detailed overview of _live_ properties of spreadsheets and their impact on users
 * Two distinct directions for the advancement of spreadsheet live programming success:
