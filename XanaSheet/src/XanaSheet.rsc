@@ -9,14 +9,16 @@
 
 module XanaSheet
 
+import IO;
+
 alias Row = list[Cell];
-data Sheet
-  = sheet(int rowCount, int colCount, list[Row] rows);
+data Sheet = sheet(int rowCount, int colCount, list[Row] rows);
 
 data Cell
   = val(real val)
   | expr(Expr expr)
   | empty()
+  | error(str msg)
   ;
   
 alias Address = tuple[int col, int row];
@@ -37,9 +39,10 @@ data Edit
   | putData(Address address, real val)
   | copy(Area from, Area to)
   | insertRow(int row)
-  | insertColumn(int col)
+  | insertCol(int col)
   ;
   
+alias Script = list[Edit];
   
 Sheet grades() = sheet(3, 3, [
   [val(6.0), val(9.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0)))],
@@ -47,25 +50,62 @@ Sheet grades() = sheet(3, 3, [
   [val(5.0), val(3.5), empty()]
 ]);
 
-Sheet gradesCopied() = sheet(3, 3, [
-  [val(6.0), val(9.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0)))],
-  [val(9.0), val(7.0), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0)))],
-  [val(5.0), val(3.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0)))]
+
+Script buildGrades1() = [
+   insertRow(0), insertRow(0), insertRow(0),
+   insertCol(0), insertCol(0), insertCol(0), 
+   putData(<0, 0>, 6.0),
+   putData(<0, 1>, 9.0),
+   putData(<0, 2>, 5.0),
+   putData(<1, 0>, 9.5),
+   putData(<1, 1>, 7.0),
+   putData(<1, 2>, 3.5),
+   putFormula(<2, 0>, div(add(ref(-2, 0), ref(-1, 0)), lit(2.0)))
+];
+
+
+test bool buildGrades1BuildsGrades1()
+  = evalScript(buildGrades1(), sheet(0, 0, []), {}).sheet == grades();
+
+
+Sheet gradesModifiedAfterCopy() = sheet(3, 3, [
+  [val(6.0), val(9.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(3.0)))],
+  [val(9.0), val(7.0), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(3.0)))],
+  [val(5.0), val(3.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(3.0)))]
 ]);
 
-Result gradesCopyAvgDown1()
-  = eval(copy(<<2, 0>, <2,0>>, <<2, 1>, <2,1>>), grades(), {});
+
+Script copyAndModifyGrades1() = [
+   copy(<<2, 0>, <2,0>>, <<2, 1>, <2,1>>),
+   copy(<<2, 0>, <2,0>>, <<2, 2>, <2,2>>),
+   putFormula(<2, 2>, div(add(ref(-2, 0), ref(-1, 0)), lit(3.0)))
+];
+
   
-Result gradesCopyAvgDown2() {
-  <s, org> = gradesCopyAvgDown1();
-  return eval(copy(<<2, 1>, <2, 1>>, <<2, 2>, <2,2>>), s, org);
-}
+test bool copyAndModifyModifiesAllClones() 
+  = evalScript(buildGrades1() + copyAndModifyGrades1(), sheet(0, 0, []), {}).sheet == gradesModifiedAfterCopy();
 
-Result updateCopiedFormula() {
-  <s, org> = gradesCopyAvgDown2();
-  return eval(putFormula(<2, 2>, div(add(ref(-2, 0), ref(-1, 0)), lit(3.0))), s, org);
-}
 
+Script insertRowAndModifyCopy() = [
+   insertRow(0),
+   putData(<0, 0>, 10.0),
+   putData(<1, 0>, 10.0),
+   //copy(<<0, 1>, <0, 1>>, <<0, 0>, <0, 0>>),
+   //copy(<<1, 1>, <1, 1>>, <<1, 0>, <1, 0>>),
+   copy(<<2, 1>, <2, 1>>, <<2, 0>, <2, 0>>),
+   putFormula(<2, 3>, div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))
+];
+
+Sheet gradesModifiedAfterInsertRow() = sheet(4, 3, [
+  [val(10.0), val(10.0), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))],
+  [val(6.0), val(9.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))],
+  [val(9.0), val(7.0), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))],
+  [val(5.0), val(3.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))]
+]);
+
+test bool insertRowAdjustsOrigins() 
+  = evalScript(buildGrades1() + copyAndModifyGrades1() + insertRowAndModifyCopy(), sheet(0, 0, []), {}).sheet
+  == gradesModifiedAfterInsertRow(); 
 
 /*
  * Editing of sheets
@@ -73,9 +113,17 @@ Result updateCopiedFormula() {
  
 alias Result = tuple[Sheet sheet, Origin origin];
 
+Result evalScript(Script script, Sheet s, Origin org) { 
+   for (e <- script) {
+     iprintln(s);
+     <s, org> = eval(e, s, org);
+   }
+   return <s, org>;
+}
+
 Result eval(putData(Address a, real v), Sheet s, Origin org) {
-  s = putCell(a, val(v));
-  return <s, removeLinks(a)>;
+  s = putCell(a, val(v), s);
+  return <s, removeLinks(a, org)>;
 }
 
 Origin removeLinks(Address a, Origin org) 
@@ -93,18 +141,29 @@ Result eval(putFormula(Address a, Expr e), Sheet s, Origin org) {
 }
 
 Result eval(insertRow(int row), Sheet s, Origin org) {
+  if (row < s.rowCount) { // bug in slicing 
+    s.rows = s.rows[0..row] + [[ empty() | _ <- [0..s.colCount] ]] + s.rows[row..];
+  }
+  else { 
+    s.rows += [[ empty() | _ <- [0..s.colCount] ]];
+  }
   s.rowCount += 1;
-  s.rows = s.rows[0..row] + [ empty() | _ <- [0..s.colCount] ] + s.rows[row..];
   
   newOrgs = { <<a.col, a.row >= row ? a.row + 1 : a.row>, 
-               <b.col, b.row >= row ? b.row + 1 : a.row>> | <a, b> <- org };
+               <b.col, b.row >= row ? b.row + 1 : a.row>> | <Address a, Address b> <- org };
   
   return <s, newOrgs>;
 }
 
-Result eval(insertColumn(int col), Sheet s, Origin org) {
+Result eval(insertCol(int col), Sheet s, Origin org) {
+  if (col < s.colCount) { // bug in slicing
+    s.rows = [ r[0..col] + [ empty() ] + r[col..] | r <- s.rows ];
+  }
+  else {
+    s.rows = [ r + [ empty() ] | r <- s.rows ];
+  } 
+  
   s.colCount += 1;
-  s.rows = [ r[0..col] + [ empty() ] + r[col..] | r <- s.rows ]; 
   
   newOrgs = { <<a.col >= col ? a.col + 1 : a.col, a.row>, 
                <b.col >= col ? b.col + 1 : b.col, b.row>> | <a, b> <- org };
@@ -146,10 +205,8 @@ Result copyCell(Address x, Address y, Sheet s, Origin org) {
 
 
 Sheet compute(Sheet sheet) {
-  solve (sheet) {
-    for (i <- [0..sheet.rowCount], j <- [0..sheet.colCount]) {
-      sheet.rows[i][j] = evalCell(sheet.rows[i][j], <j, i>, sheet);
-    }
+  for (i <- [0..sheet.rowCount], j <- [0..sheet.colCount]) {
+    sheet.rows[i][j] = evalCell(getCell(<j, i>, sheet), <j, i>, sheet);
   }
   return sheet;
 }
@@ -170,11 +227,19 @@ real evalExpr(div(l, r), Address a, Sheet s)
   
 real evalExpr(lit(v), Address a, Sheet s) = v;
 
-real getCellValue(Address a, Sheet s) = v
-  when val(v) := evalCell(getCell(a, s), a, s);
+real getCellValue(Address a, Sheet s) {
+   c = evalCell(getCell(a, s), a, s);
+   switch (c) {
+     case val(v):   return v;
+     case empty():  return 0.0;
+     case error(_): return 0.0;
+     case expr(e):  return evalExpr(e, a, s);
+   }
+}
 
-real getCellValue(Address a, Sheet s) = 0.0
-  when empty() := evalCell(getCell(a, s), a, s);
-
-
-Cell getCell(Address a, Sheet s) = s.rows[a.row][a.col];
+Cell getCell(Address a, Sheet s) {
+  if (a.row < s.rowCount, a.col < s.colCount) {
+     return s.rows[a.row][a.col];
+  }
+  return error("Out-of-bounds: <a>");
+}
