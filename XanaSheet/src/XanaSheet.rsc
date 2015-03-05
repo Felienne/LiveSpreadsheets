@@ -14,7 +14,7 @@ data Cell
 alias Address = tuple[int col, int row];
   
 data Expr
-  = ref(int colOffset, int rowOffset)
+  = ref(int colOffset, int rowOffset) // only do relative now
   | add(Expr lhs, Expr rhs)
   | div(Expr lhs, Expr rhs)
   | lit(real val)
@@ -53,6 +53,11 @@ Result gradesCopyAvgDown2() {
   return eval(copy(<<2, 1>, <2, 1>>, <<2, 2>, <2,2>>), s, org);
 }
 
+Result updateCopiedFormula() {
+  <s, org> = gradesCopyAvgDown2();
+  return eval(putFormula(<2, 2>, div(add(ref(-2, 0), ref(-1, 0)), lit(3.0))), s, org);
+}
+
 
 /*
  * Editing of sheets
@@ -69,14 +74,14 @@ Origin removeLinks(Address a, Origin org)
   = { <f, t> | <f, t> <- org, f != a};
 
 Result eval(putFormula(Address a, Expr e), Sheet s, Origin org) {
-  s = putCell(a, expr(e));
+  s = putCell(a, expr(e), s);
   if (<a, Address src> <- org) {
     toReconcile = {src} + { b | <b, src> <- org+ };
     for (Address x <- toReconcile) {
-       s = putCell(x, expr(e));
+       s = putCell(x, expr(e), s);
     }
   } 
-  return <sheet, org>;
+  return <s, org>;
 }
 
 Sheet putCell(Address a, Cell c, Sheet s) {
@@ -95,7 +100,13 @@ Result copyCell(Address x, Address y, Sheet s, Origin org) {
   s = putCell(y, toBeCopied, s);
   org = removeLinks(y, org);
   if (toBeCopied is expr) {
-    org += { <y, x> };
+    if (<x, Address src> <- org) {
+      // maintain farthest origin 
+      org += {<y, src>};
+    }
+    else {
+      org += {<y, x>};
+    }
   }
   return <s, org>;
 }
