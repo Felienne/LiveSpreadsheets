@@ -1,5 +1,13 @@
-module XanaSheet
+@license{
+  Copyright (c) 2009-2015 CWI
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+}
+@contributor{Tijs van der Storm storm@cwi.nl - CWI}
 
+module XanaSheet
 
 alias Row = list[Cell];
 data Sheet
@@ -82,6 +90,26 @@ Result eval(putFormula(Address a, Expr e), Sheet s, Origin org) {
     }
   } 
   return <s, org>;
+}
+
+Result eval(insertRow(int row), Sheet s, Origin org) {
+  s.rowCount += 1;
+  s.rows = s.rows[0..row] + [ empty() | _ <- [0..s.colCount] ] + s.rows[row..];
+  
+  newOrgs = { <<a.col, a.row >= row ? a.row + 1 : a.row>, 
+               <b.col, b.row >= row ? b.row + 1 : a.row>> | <a, b> <- org };
+  
+  return <s, newOrgs>;
+}
+
+Result eval(insertColumn(int col), Sheet s, Origin org) {
+  s.colCount += 1;
+  s.rows = [ r[0..col] + [ empty() ] + r[col..] | r <- s.rows ]; 
+  
+  newOrgs = { <<a.col >= col ? a.col + 1 : a.col, a.row>, 
+               <b.col >= col ? b.col + 1 : b.col, b.row>> | <a, b> <- org };
+  
+  return <s, newOrgs>;
 }
 
 Sheet putCell(Address a, Cell c, Sheet s) {
