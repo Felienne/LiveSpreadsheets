@@ -10,6 +10,8 @@
 module XanaSheet
 
 import IO;
+import List;
+import String;
 
 alias Row = list[Cell];
 data Sheet = sheet(int rowCount, int colCount, list[Row] rows);
@@ -115,7 +117,7 @@ alias Result = tuple[Sheet sheet, Origin origin];
 
 Result evalScript(Script script, Sheet s, Origin org) { 
    for (e <- script) {
-     iprintln(s);
+     println(ppSheet(s));
      <s, org> = eval(e, s, org);
    }
    return <s, org>;
@@ -139,6 +141,23 @@ Result eval(putFormula(Address a, Expr e), Sheet s, Origin org) {
   } 
   return <s, org>;
 }
+
+Result copyCell(Address x, Address y, Sheet s, Origin org) {
+  Cell toBeCopied = getCell(x, s);
+  s = putCell(y, toBeCopied, s);
+  org = removeLinks(y, org);
+  if (toBeCopied is expr) {
+    if (<x, Address src> <- org) {
+      // maintain farthest origin 
+      org += {<y, src>};
+    }
+    else {
+      org += {<y, x>};
+    }
+  }
+  return <s, org>;
+}
+
 
 Result eval(insertRow(int row), Sheet s, Origin org) {
   if (row < s.rowCount) { // bug in slicing 
@@ -182,21 +201,6 @@ Result eval(copy(Area a1:<Address xul, xdr>, Area a2:<Address yul, ydr>), Sheet 
   return copyCell(xul, yul, s, org);
 }
 
-Result copyCell(Address x, Address y, Sheet s, Origin org) {
-  Cell toBeCopied = getCell(x, s);
-  s = putCell(y, toBeCopied, s);
-  org = removeLinks(y, org);
-  if (toBeCopied is expr) {
-    if (<x, Address src> <- org) {
-      // maintain farthest origin 
-      org += {<y, src>};
-    }
-    else {
-      org += {<y, x>};
-    }
-  }
-  return <s, org>;
-}
 
 
 /*
@@ -243,3 +247,28 @@ Cell getCell(Address a, Sheet s) {
   }
   return error("Out-of-bounds: <a>");
 }
+
+/*
+ * Printing of sheets (Pandoc compatible)
+ */
+
+
+str ppSheet(Sheet s) {
+  r = "  | " + intercalate(" | ", [ stringChar(65 + i) | i <- [0..s.colCount] ]);
+  r += "\n--|-" + intercalate("-|-", [ "--" | i <- [0..s.colCount] ]);
+  for (i <- [0..s.rowCount]) {
+    r += "\n<i> | " + intercalate(" | ", [ ppCell(c) | c <- s.rows[i] ]);
+  }
+  return r;
+}
+
+str ppCell(val(v)) = "<v>";
+str ppCell(expr(e)) = "=<ppExpr(e)>";
+str ppCell(empty()) = "   ";
+str ppCell(error(m)) = "#error(<m>)";
+
+str ppExp(ref(dc, dr)) = "C[<dc>]R[<dr>]";
+str ppExpr(add(l, r)) = "(<ppExpr(l)> + <ppExpr(r)>)";
+str ppExpr(div(l, r)) = "<ppExpr(l)> / <ppExpr(r)>";
+str ppExpr(lit(v)) = "<v>";
+
