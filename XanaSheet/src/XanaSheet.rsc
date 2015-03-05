@@ -56,12 +56,8 @@ Sheet grades() = sheet(3, 3, [
 Script buildGrades1() = [
    insertRow(0), insertRow(0), insertRow(0),
    insertCol(0), insertCol(0), insertCol(0), 
-   putData(<0, 0>, 6.0),
-   putData(<0, 1>, 9.0),
-   putData(<0, 2>, 5.0),
-   putData(<1, 0>, 9.5),
-   putData(<1, 1>, 7.0),
-   putData(<1, 2>, 3.5),
+   putData(<0, 0>, 6.0), putData(<0, 1>, 9.0), putData(<0, 2>, 5.0),
+   putData(<1, 0>, 9.5), putData(<1, 1>, 7.0), putData(<1, 2>, 3.5),
    putFormula(<2, 0>, div(add(ref(-2, 0), ref(-1, 0)), lit(2.0)))
 ];
 
@@ -118,6 +114,7 @@ alias Result = tuple[Sheet sheet, Origin origin];
 Result evalScript(Script script, Sheet s, Origin org) { 
    for (e <- script) {
      println(ppSheet(s));
+     println(org);
      <s, org> = eval(e, s, org);
    }
    return <s, org>;
@@ -257,18 +254,22 @@ str ppSheet(Sheet s) {
   r = "  | " + intercalate(" | ", [ stringChar(65 + i) | i <- [0..s.colCount] ]);
   r += "\n--|-" + intercalate("-|-", [ "--" | i <- [0..s.colCount] ]);
   for (i <- [0..s.rowCount]) {
-    r += "\n<i> | " + intercalate(" | ", [ ppCell(c) | c <- s.rows[i] ]);
+    r += "\n<i> | " + intercalate(" | ", [ ppCell(s.rows[i][j], <j, i>) | j <- [0..s.colCount] ]);
   }
   return r;
 }
 
-str ppCell(val(v)) = "<v>";
-str ppCell(expr(e)) = "=<ppExpr(e)>";
-str ppCell(empty()) = "   ";
-str ppCell(error(m)) = "#error(<m>)";
+str ppCell(val(v), Address _) = "<v>";
+str ppCell(expr(e), Address a) = "=<ppExpr(e, a)>";
+str ppCell(empty(), Address _) = "   ";
+str ppCell(error(m), Address _) = "#error(<m>)";
 
-str ppExp(ref(dc, dr)) = "C[<dc>]R[<dr>]";
-str ppExpr(add(l, r)) = "(<ppExpr(l)> + <ppExpr(r)>)";
-str ppExpr(div(l, r)) = "<ppExpr(l)> / <ppExpr(r)>";
-str ppExpr(lit(v)) = "<v>";
+str ppExpr(ref(dc, dr), Address a) = "<c><r>"
+  when
+    str c := stringChar(65 + a.col + dc),
+    str r := "<a.row + dr>";
+
+str ppExpr(add(l, r), Address a) = "(<ppExpr(l, a)> + <ppExpr(r, a)>)";
+str ppExpr(div(l, r), Address a) = "<ppExpr(l, a)> / <ppExpr(r, a)>";
+str ppExpr(lit(v), Address _) = "<v>";
 
