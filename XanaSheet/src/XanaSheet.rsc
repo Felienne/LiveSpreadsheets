@@ -12,6 +12,7 @@ module XanaSheet
 import IO;
 import List;
 import String;
+import util::Math;
 
 alias Row = list[Cell];
 data Sheet = sheet(int rowCount, int colCount, list[Row] rows);
@@ -29,6 +30,7 @@ data Expr
   = ref(int colOffset, int rowOffset) // only do relative now
   | add(Expr lhs, Expr rhs)
   | div(Expr lhs, Expr rhs)
+  | round(Expr arg)
   | lit(real val)
   ;
   
@@ -67,16 +69,16 @@ test bool buildGrades1BuildsGrades1()
 
 
 Sheet gradesModifiedAfterCopy() = sheet(3, 3, [
-  [val(6.0), val(9.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(3.0)))],
-  [val(9.0), val(7.0), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(3.0)))],
-  [val(5.0), val(3.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(3.0)))]
+  [val(6.0), val(9.5), expr(round(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))))],
+  [val(9.0), val(7.0), expr(round(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))))],
+  [val(5.0), val(3.5), expr(round(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))))]
 ]);
 
 
 Script copyAndModifyGrades1() = [
    copy(<<2, 0>, <2,0>>, <<2, 1>, <2,1>>),
    copy(<<2, 0>, <2,0>>, <<2, 2>, <2,2>>),
-   putFormula(<2, 2>, div(add(ref(-2, 0), ref(-1, 0)), lit(3.0)))
+   putFormula(<2, 2>, round(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))))
 ];
 
   
@@ -91,14 +93,14 @@ Script insertRowAndModifyCopy() = [
    //copy(<<0, 1>, <0, 1>>, <<0, 0>, <0, 0>>),
    //copy(<<1, 1>, <1, 1>>, <<1, 0>, <1, 0>>),
    copy(<<2, 1>, <2, 1>>, <<2, 0>, <2, 0>>),
-   putFormula(<2, 3>, div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))
+   putFormula(<2, 3>, round(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0))))
 ];
 
 Sheet gradesModifiedAfterInsertRow() = sheet(4, 3, [
-  [val(10.0), val(10.0), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))],
-  [val(6.0), val(9.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))],
-  [val(9.0), val(7.0), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))],
-  [val(5.0), val(3.5), expr(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0)))]
+  [val(10.0), val(10.0), expr(round(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0))))],
+  [val(6.0), val(9.5), expr(round(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0))))],
+  [val(9.0), val(7.0), expr(round(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0))))],
+  [val(5.0), val(3.5), expr(round(div(add(ref(-2, 0), ref(-1, 0)), lit(5.0))))]
 ]);
 
 test bool insertRowAdjustsOrigins() 
@@ -228,6 +230,9 @@ real evalExpr(div(l, r), Address a, Sheet s)
   
 real evalExpr(lit(v), Address a, Sheet s) = v;
 
+real evalExpr(round(e), Address a, Sheet s) = toReal(round(v))
+   when v := evalExpr(e, a, s);
+
 real getCellValue(Address a, Sheet s) {
    c = evalCell(getCell(a, s), a, s);
    switch (c) {
@@ -272,4 +277,5 @@ str ppExpr(ref(dc, dr), Address a) = "<c><r>"
 str ppExpr(add(l, r), Address a) = "(<ppExpr(l, a)> + <ppExpr(r, a)>)";
 str ppExpr(div(l, r), Address a) = "<ppExpr(l, a)> / <ppExpr(r, a)>";
 str ppExpr(lit(v), Address _) = "<v>";
+str ppExpr(round(e), Address a) = "round(<ppExpr(e, a)>)";
 
