@@ -1,6 +1,6 @@
 ---
 title: | 
-   E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste Tracking in Spreadsheets
+  Copy-Paste Tracking in Spreadsheets: Single Point of Change without Compromising Directness 
 author:
   - name: Felienne Hermans
     affiliation: Delft University of Technology
@@ -31,6 +31,7 @@ Copy-Paste Tracking in Spreadsheets: Once and Only Once without Abstraction
 E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste Tracking.
 One clone to rule them all.
 E Pluribus Unum: Many-to-One Direct Manipulation in Spreadsheets
+E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste Tracking in Spreadsheets
 -->
  
 
@@ -59,7 +60,7 @@ This copy-pasting as in the stories above is not always done my mistake. Rather,
 
 <!-- should emphasize the copying here... --->
 
-Existing research has focused on  improving spreadsheets in this direction. An example of this is the work of Abraham _et al._ , who have developed a system called ClassSheets [@Abra2005] [@Enge2005] with which the structure of a spreadsheet can be described separately. The actual spreadsheet can then be guaranteed to conform to the meta description. 
+Existing research has focused on  improving spreadsheets in this direction. An example of this is the work of Abraham _et al._ , who have developed a system called ClassSheets [@Enge2005] with which the structure of a spreadsheet can be described separately. The actual spreadsheet can then be guaranteed to conform to the meta description. 
 <!-- TODO: MDSheet -->
 Another direction is enriching spreadsheets with user-defined functions (UDFs) [@Jone2003]. In this case, spreadsheets users can factor out common computations into separate cells, and refer to them from elsewhere in the spreadsheet.
 
@@ -108,62 +109,57 @@ Therefore, editing one clone triggers updating the clones which belong to  the s
 
 # Semantics of Copy-Paste Tracking
 
-We've developed an executable semantics for experimenting with copy-paste tracking.
-It can be used to simulate interactive editing sessions with a spreadsheet [^1]. 
-For instance, the following script is used to build the initial sheet of Fig. 1:
+The previous section introduced copy-paste tracking from the perspective of the user. 
+Here we discuss how copy-paste tracking could be implemented.
 
-~~~~
-  putData(<0, 0>, 6.0), putData(<0, 1>, 9.0), putData(<0, 2>, 5.0), // enter the data
-  putData(<1, 0>, 9.5), putData(<1, 1>, 7.0), putData(<1, 2>, 3.5),
-  putFormula(<2, 0>, div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))) // add the formula
-~~~~ 
-
-The `put` actions are anchored at absolute, zero-based coordinates $\langle column, row\rangle$.
-Formula expressions are written in prefix notation. 
-Addition is represented by the `add` constructor, division by `div`, and literals by `lit`. 
-The `ref` expression is a relative cell reference, where the numbers indicate column and row offsets from the current cell, respectively. 
-
-To model copy-paste tracking, `copy` actions are explicitly modeled.
-For instance, the following two actions copy the formula for computing the average in D2 down to D3 and D4[^2]: 
-
-~~~~
-  copy(<2, 0>, <2, 1>), copy(<2, 0>, <2, 2>)`
-~~~~  
-  
-The `copy` actions also populate the origin relation $Org$, which is a relation between absolute cell addresses:  
-$Org = \{\langle \langle 2,2\rangle,\langle 2,0\rangle\rangle,\langle \langle 2,1\rangle,\langle 2,0\rangle\rangle\}$.
+A spreadsheet is a rectangular grid of cells where each cell is identified by its *address* consisting of zero-based  $\langle column, row\rangle$ coordinates.
+User actions always operate on one of more of these addresses.
+The origin relation between cells is then modeled as a binary relation between such address. For instance, the relation $Org = \{\langle \langle 2,2\rangle,\langle 2,0\rangle\rangle,\langle \langle 2,1\rangle,\langle 2,0\rangle\rangle\}$ captures the origin relation visualized in Figure 1 (2) [^2]. 
 In this case, the relation states that the formulas in cell $\langle 2,2\rangle$ and cell $\langle 2, 1\rangle$ both originate from  cell $\langle 2,0\rangle$.
 
-In the third step of Fig. 1, the formula is updated in the bottom row to add rounding of the average grade. 
-This is modeled again using a `putFormula` action: 
 
-~~~~
-  putFormula(<2, 2>, round(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))))`.
-~~~~
+Interacting with the spreadsheet not only updates the sheet itself, but also maintains the origin relation. We describe the effect of the most relevant edit operations on a cell $c$:
 
-Since this update is applied to a cell containing a formula clone, the origin relation is used to find all cells which are in the same equivalence class as the current one.
-The equivalence class of a cell $c$ is defined as $[c]_{Org} = \{\; c' \;|\; \langle c, c'\rangle \in (Org \cup Org^{-1})^* \;\}$.
-That is the set of cells in the equivalence class of $c$ is the right-image under $c$ in the symmetric, transitive, and reflexive closure of the origin relation.
-Since all cell references in expressions are relative, the new formula of in the `putFormula` action can be just copied to all cells in the equivalence class. 
+- Entering data: the sheet is updated with the new data. If there are entries in the origin relation starting from $c$, they are removed.
 
-Entering data and formulas, and copy-pasting cells are not the only operations in spreadsheets. 
-For the purpose of copy-paste tracking, however, the only two other relevant operations are inserting or removing rows and columns. 
-In these cases, the origin relation needs to be adjusted as well. 
+- Entering a formula: 
+If $c$ does not  participate in any origin relation, it is is simply updated with the new formula. 
+Otherwise, the origin relation is used to find all cells which are in the same equivalence class as $c$.
+The equivalence class of a cell $c$ is  defined as $\{\; c' \;|\; \langle c, c'\rangle \in (Org \cup Org^{-1})^* \;\}$.
+That is, the set of cells in the equivalence class of $c$ is equal to the right-image of $c$ in the symmetric, transitive, and reflexive closure of the origin relation.
+All cells in the equivalence class are updated with the new formula.
+
+- Copying cell $c$ to $c'$: The contents of $c$ is copied to $c'$. 
+If the contents is a formula the origin relation is extended with $\langle c', c\rangle$. 
+
+- Inserting/removing a row or column: after updating the sheet, the origin relation is adjusted so that cell addresses refer to their new locations. 
 For instance, when inserting a row  at position $i$, the row components of all the cell addresses on rows $\geq i$ in the origin relation needs to be shifted one down.
-Similar adjustments need to be made when inserting a column or deleting a row or column.
+
 
 Although in this section we have just discussed copy-paste tracking for formulas, the same model could equally well apply to copy-pasting of data as well. In that case, the origin relation helps against inadvertently duplicating input data.
 
-An interesting special case is particularly error-prone "paste as value" operation. 
-Instead of copying the formula, this operation copies the result of the formula, thus completely disconnecting the value from its original source.
-Tracking such copy-paste actions would probably not be very useful: editing the pasted value would incur computing the inverse of the original formula, and updating the input data accordingly!
+An interesting special case is the particularly risky "paste as value" operation. 
+Instead of copying a formula, this operation copies the computed value, thus completely disconnecting the destination cell from its source.
+Tracking such copy-paste actions would probably not be very useful: editing the pasted value would incur computing the inverse of the original formula, and updating the input data accordingly! 
+In fact this brings us in the realm of bidirectional transformation and contraint maintenance [@Meertens] [@Lenses].
 
 
+## Prototype Implementation
+
+We've implemented the above semantics in  a spreadsheet simulator to (re)play interactive editing sessions with a spreadsheet. The code can be found online here: 
+
+> [https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet)
+
+
+
+<!--
 [^1]: The semantics is developed in Rascal [@Rascal] and can be found online here: [https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet)
+-->
 
 
 [^2]: Note that we don't count the header row as an actual row in this formalization.
 
+[^3]: 
 
 <!--
 # Discussion
@@ -177,16 +173,18 @@ Changes user interaction
 
 Related work for this paper comes in different categories, that we will summarize in this section.
 
-- *Origin tracking*: [@VanDeursenKT93] [@InostrozaVdSE]
+- *Origin tracking*: [@VanDeursenKT93] A similar application to copy-paste tracking is presented in [@InostrozaVdSE], where origin tracking is used to implemented editable regions on generated code. 
 
-- *Transclusion*:  Ted Nelson's concept of _transclusion_ [@Nelson65] is a form of "reference by inclusion" where transcluded data is presented through a "live" view: whenever the target of the reference is updated, the references themselves update as well.
+- *Transclusion*:  Ted Nelson's concept of _transclusion_ [@Nelson65] is a form of "reference by inclusion" where transcluded data is presented through a "live" view: whenever the transcluded content is updated, the views are updated as well.
 Our origin relation provides a similar hyperlinking between cells. 
-But unlike in the case of transclusion, the relation is bidirectional: changes to the original are propagated forward, but changes to copies (references) are also propagated backwards (and then forward again). 
+But unlike in the case of transclusion, the relation is bidirectional: changes to the original are propagated forward, but changes to copies (references) are also propagated backwards (and then forwards again). 
 
 - *Clone tracking* in software: Godfrey and Tu [@Godf2002] proposed a method called _origin analysis_ which is a related to both clone detection and the above described origin tracking, but aims at deciding if a program entity was newly introduced or whether it if it should more accurately be viewed as a renamed, moved, or otherwise changed version of an previously existing entity. This laid the ground for a tool called _CloneTracker_ that "can automatically track clones as the code evolves, notify developers of modifications to clone
 regions, and support simultaneous editing of clone regions." [@Dual2007].
 
-- *Prototype-based inheritance* was poineered in the Self language [@Self], and contributed to direct manipulation model of interaction [@Malo95]. In proto-type-based languages, objects are created by cloning and existing object. The cloned object then inherits features (methods, slots) from its prototype. This parent relation between object is similar to our origin relation. However, we are not aware of any related work discussing propagating changes on clones back to the parents. 
+- *Prototype-based inheritance*: Lieberman introduced prototypes to implement shared behavior in object-oriented programming. In proto-type-based languages, objects are created by cloning and existing object. 
+The cloned object then inherits features (methods, slots) from its prototype. 
+Prototype-based inheritance contributed to the direct manipulation model of interaction [@Malo95]. The parent relation between objects is similar to our origin relation. However, we are not aware of any related work using this relation to propagate changes to clones back to their parents. 
 
 
 # Conclusion
@@ -196,6 +194,23 @@ Future work
 Empirical evaluation which kind of copy is most used (?)
 
 Inferring origin relations to "migrate".
+
+
+Copy-paste tracking can generalized to a broader scope by seeing it as an example of abstractions that are materialized or referenced in multiple places in a runnning system.
+
+Bidirectional transformation.
+
+We give a tentative list of example which would merit further research. 
+
+- Manipulating stack frames in a debugger view to change procedure definitions.
+
+- Use sites of procedures, classes, etc. vs their definitions
+
+- Modifying style attributes of GUI elements which originate from a reusable abstraction.
+
+- Editing the output of template-based code generator to change both the template and or the input to the template.
+
+
 
 
 # References
