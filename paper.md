@@ -29,6 +29,7 @@ Copy-Paste Tracking in Spreadsheets: Supporting Reuse without Compromising Direc
 Copy-Paste Tracking in Spreadsheets: Single Point of Change without Abstraction
 Copy-Paste Tracking in Spreadsheets: Once and Only Once without Abstraction
 E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste Tracking.
+One clone to rule them all.
 -->
  
 
@@ -64,10 +65,8 @@ Another direction is enriching spreadsheets with user-defined functions (UDFs) [
 Although these features improve the reliability of spreadsheet use, they have one important drawback, namely, that they break the "direct manipulation" aspect of spreadsheets. In a sense, separate meta models, or user defined abstractions, create distance between the actual thing (data + formulas), and its behavior. Instead of just looking at the cells, the user now has to look at at least two places: the cells containing the data and the the separate definitions of the abstractions (meta model and/or user defined functions). 
 
 
-In this paper we  introduce a different approach based on tracking formula copy actions and transforming edits on copies back to the original.
-The original is not modified directly,  within the context of their surrounding cells.
-
-So, instead of introducing levels of indirection via abstractions, XanaSheet supports reuse and sharing by allowing users to edit equivalence classes of formulas, all at once. 
+In this paper we introduce a different approach based on tracking copy-paste actions on formulas and transforming edits on copies ("clones") back to the original.
+So, instead of introducing another level of indirection using abstraction, XanaSheet supports single-point-of-change by allowing users to edit equivalence classes of formulas, all at once. 
 In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. 
 Nevertheless, this technique eliminates a large class of copy-paste bugs, without at the same time comprimising the direct manipulation of formulas in cells.
 
@@ -89,63 +88,74 @@ As a result, we conjecture, it is possible to have our cake and eat it too, and 
 ![*Maintaining consistency among clones of formulas through copy-paste tracking*](images/grades.png)
 
 Figure 1 shows an example user interaction with a XanaSheet containing student grades.
-In the first step  the sheet contains just the Lab and Exam grades of three students, and a formula for computing the average of the two grades.
+In the first step  the sheet contains just the Lab and Exam grades of three students, and a formula for computing the average of the two grades in D2.
 In the second step, the formula in cell D2 is copied to D3 and D4.
 D3 and D4 are clones of D2, and this relation is maintained by the system as an origin relation (visualized using the arrow). 
 In the third step, the clone in D4 is modified to apply rounding to the computed average. 
 Unlike in normal spreadsheets, however, this is not the end of the story
-and XanaSheet will reconcile the  original formula of D2 and the other clone in D3 according to the changes to D4. 
+and XanaSheet will reconcile the  original formula of D2 and the other clone in D3 with the changes in D4. 
 
 A way to understand what is happening here, is to see spreadsheet formulas as materialized or unfolded abstractions.
-The abstraction in Fig. 1  is function for computing the average of two grades. 
+The abstraction in Fig. 1  is function `average(x,y)` for computing the average of two grades. 
 In ordinary programming such a function could, for instance, be mapped over a list of pairs of grades to obtain a list of averages, like `map(average, zip(Lab, Exam))`.
-In XanaSheet, the abstraction `average` does not really exist, but is represented collectively by the set of all its inlined applications: `[(Lab[0]+Exam[0])/ 2, (Lab[1]+Exam[1])/2, (Lab[2]+Exam[2])/2]`.
-In a  sense, each application is a clone of the same implicit prototype, with parameters filled in with concrete data.
+In XanaSheet, the abstraction `average` does not really exist, but is represented collectively by the set of all its inlined applications, e.g. `[(Lab[0]+Exam[0])/ 2, (Lab[1]+Exam[1])/2, (Lab[2]+Exam[2])/2]`.
+In a  sense, each application is a clone of the same implicit prototype, with parameters filled in with concrete data references.
 The tracking relation induced by copy-paste actions, identifies which clones belong to the same equivalence class.
 Therefore, editing one clone triggers updating the clones which belong to  the same  class.
 
 
 
-
-
-
-
-
-
 # A Model of XanaSheet
 
-We've developed a semantics for XanaSheet which can be used to simulate editing sessions with a spreadsheet [^1]. 
+We've developed an executable semantics for XanaSheet which can be used to simulate editing sessions with a spreadsheet [^1]. 
 For instance, the following script is used to build the initial sheet of Fig. 1:
 
 ~~~~
-insertRow(0), insertRow(0), insertRow(0), // create 3 rows
-insertCol(0), insertCol(0), insertCol(0), // and 3 columns
-putData(<0, 0>, 6.0), putData(<0, 1>, 9.0), putData(<0, 2>, 5.0), // insert data
-putData(<1, 0>, 9.5), putData(<1, 1>, 7.0), putData(<1, 2>, 3.5),
-putFormula(<2, 0>, div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))) // add the formula
+  putData(<0, 0>, 6.0), putData(<0, 1>, 9.0), putData(<0, 2>, 5.0), // enter the data
+  putData(<1, 0>, 9.5), putData(<1, 1>, 7.0), putData(<1, 2>, 3.5),
+  putFormula(<2, 0>, div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))) // add the formula
 ~~~~ 
+
+The `put` actions are anchored at absolute, zero-based coordinates $\langle column, row\rangle$.
+Formula expressions are written in prefix notation. 
+The `ref` expression is a relative cell reference, where the numbers indicate column resp. row offsets from the current cell. 
+
+To model copy-paste tracking, `copy` actions are explicitly modeled.
+For instance, the following two actions copy the formula for computing the average in D2 down to D3 and D4[^2]: 
+
+~~~~
+  copy(<2, 0>, <2, 1>), copy(<2, 0>, <2, 2>)`
+~~~~  
+  
+The `copy` actions also populate the origin relation $Org$, which is a relation between absolute cell addresses:  
+$Org = \{\langle \langle 2,2\rangle,\langle 2,0\rangle\rangle,\langle \langle 2,1\rangle,\langle 2,0\rangle\rangle\}$.
+In this case, the relation states that the formulas in cell $\langle 2,2\rangle$ and cell $\langle 2, 1\rangle$ both originate from  cell $\langle 2,0\rangle$.
+
+In the third step of Fig. 1, the formula is updated in the bottom row to add rounding of the average grade. 
+This is modeled again using a `putFormula` action: 
+
+~~~~
+  putFormula(<2, 2>, round(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))))`.
+~~~~
+
+Since this update is applied to a copied formula, the origin relation is used to find all cells in the same equivalence class as the current one.
+The equivalence class of a cell $c$ is defined as $[c]_{Org} = \{\; c' \;|\; \langle c, c'\rangle \in (Org \cup Org^{-1})^* \;\}$.
+That is the set of cells in the equivalence class of $c$ is the right-image under $c$ in the symmetric, transitive, and reflexive closure of the origin relation.
+Since all cell references in expressions are relative, the new formula of in the `putFormula` action can be just copied to all cells in the equivalence class. 
+
+Entering data and formulas, and copy-pasting cells are not the only operations in spreadsheets. 
+For the puprose of copy-paste tracking, however, the only two other relevant operations are inserting or removing rows and columns. 
+In these cases, the origin relation needs to be adjusted as well. 
+For instance, when inserting a row  at position $i$, the row components of all the cell addresses on rows $>= i$ in the origin relation needs to be shifted one down.
+Similar adjustments need to be made when inserting a column or deleting a row or column.
+
+
 
 [^1]: The semantics is developed in Rascal [@Rascal] and can be found online here: [https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet)
 
-The "put" actions are anchored at absolute coordinates $\langle column, row\rangle$ (zero-based).
-Formula expressions are written in prefix notation. 
-The "ref" expression is a relative cell reference, where the number indicate column resp. row offsets from the current cell. 
 
-To model step two, "copy" actions are explicitly modeled.
-The following two actions copy the formula down: `copy(<2, 0>, <2, 1>), copy(<2, 0>, <2, 2>)`
-As a result we arrive at the sheet of Fig.1 (2). 
-As a side-effect, however, these copy actions also populate the origin relation: 
-${\langle \langle 2,2\rangle,\langle 2,0\rangle\rangle,\langle \langle 2,1\rangle,\langle 2,0\rangle\rangle}$.
-In this case, the relation states that the formulas in cell $\langle 2,2\rangle$ and cell $\langle 2, 1\rangle$ both originate from the formula in cell $\langle 2,0\rangle$.
+[^2]: Note that we don't count the header row as an actual row in this formalization.
 
-In the third step of Fig. 1, the formula is updated in the bottom row to add rounding of the average grade:
-
-~~~~
-putFormula(<2, 2>, round(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0)))) // update in the bottom row
-~~~~
-
-Instead of just modifying a single location $loc$, the origin relation captures all locations that need to be updated. This set of locations is computed as follows:
-$(Org \cup Org^{-1})^*[loc]$.
 
 # Discussion
 
