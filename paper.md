@@ -1,6 +1,6 @@
 ---
 title: | 
-  Copy-Paste Tracking in Spreadsheets: Single Point of Change without Compromising Directness 
+  Copy-Paste Tracking in Spreadsheets: Single Point of Change without Compromising Direct Manipulation 
 author:
   - name: Felienne Hermans
     affiliation: Delft University of Technology
@@ -32,20 +32,23 @@ E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste
 One clone to rule them all.
 E Pluribus Unum: Many-to-One Direct Manipulation in Spreadsheets
 E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste Tracking in Spreadsheets
--->
+  Copy-Paste Tracking in Spreadsheets: Single Point of Change without Compromising Direct Manipulation 
+  Live Copy-Paste in Spreadsheets
+  Turning duplication into an asset
+  -->
  
 
 Spreadsheet systems can easily be considered the most successful form of programming. Winston [@Wins2001] estimates that 90% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modelling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko[@Pank2006] estimates that 95% of U.S. firms, and 80% in Europe, use spreadsheets in some form for financial reporting.
 
 Spreadsheets are formally defined as a collection of worksheets, which in turn can contain cells. These cells can contain values, like numbers or text, or formulas, with calculations and cell references. In addition to these basic operations, many spreadsheet systems also allow users to create charts, graphs and pivot tables. When a user enters or updates a formula, the result is immediately shown to the user. Also, all cells depending on the changed formula are updated immediately. 
 
-Researchers have  argued that the _liveness_ characteristics of spreadsheets have contributed to the widespread success of spreadsheets [@thesisFelienne] and we know from interviews with users that liveness is important to them. They often start building a spreadsheet with the end goal in mind, and manipulate the formulas until the obtain the result they want.
+Researchers have  argued that the _liveness_ characteristics of spreadsheets have contributed to the widespread success of spreadsheets [@thesisFelienne] and we know from interviews with users that liveness is important to them. They often start building a spreadsheet with the end goal in mind, and manipulate the formulas until they obtain the result they want.
 
 The liveness characteristics of spreadsheets can be divided in two categories:
 
-- Direct manipulation: instead of editing a separate plan or program to achieve some result, the spreadsheet user edits the "thing itself": there is almost no distinction between the actual data and the "code" of a spreadsheet. This feature addresses the "gulf of execution" which exists between a goal, and the steps that need to be executed to achieve that goal [@Malo95] [@LiebermanFry1995].
+- Direct manipulation: instead of editing a separate plan or program to achieve some result, the spreadsheet user edits the "thing itself": there is almost no distinction between the actual data and the "code" of a spreadsheet. This feature addresses the "gulf of execution" which exists between the user's goal, and the steps that are required to achieve that goal [@norman1986cognitive].
 
-- Immediate feedback: after a change to the spreadsheet data or formulas, the user can immediately observe the effect of the edit. This feature bridges the "gulf of evaluation"which exists between performing an action and receiving feedback on the success of that action [@LiebermanFry1995].
+- Immediate feedback: after a change to the spreadsheet data or formulas, the user can immediately observe the effect of the edit. This feature bridges the "gulf of evaluation"which exists between performing an action and receiving feedback on the success of that action [@norman1986cognitive].
 
 
 
@@ -56,11 +59,11 @@ Reason (?): copy-paste is the only mechanism for reuse/sharing behavior/function
 
 Despite these attractive features for end-users, spreadsheets are well-known to be extremely fault-prone [@Pank2006]. There are numerous _horror stories_ known in which organizations lost money or credibility because of spreadsheet mistakes. TransAlta for example lost US $24 Million in 2003 because of a copy-paste error in a spreadsheet [@Tran2003]. More recently, the Federal Reserve made a copy-paste error in their consumer credit statement which, although they did not make an official statement about the impact, could have led to a difference of US $4 billion [@Fede2010]. These stories, while single instances of copy-paste problems in spreadsheets do, give credibility to the hypothesis  that copy-paste errors in spreadsheets can greatly impact spreadsheet quality. 
 
-This copy-pasting as in the stories above is not always done my mistake. Rather, we see spreadsheet users using copy-pasting as a deliberate technique. This is understandable, as standard spreadsheets do not support any form of data schema or meta model, so there is no way in which a new worksheet in a spreadsheet could inherit or reuse the model of an existing worksheet. Copy-paste is then often used to compensate for for the lack of code abstractions [@Herm2013]. Finally, when faced with spreadsheets they do not know, users are often afraid to modify existing formulas, thus copy-paste them and add new functionality [@Herm2013] creating many versions of similar formulas, of which the origin can no longer be determined.
+This copy-pasting as in the stories above is not always done by mistake. Rather, we see spreadsheet users using copy-pasting as a deliberate technique. This is understandable, as standard spreadsheets do not support any form of data schema or meta model, so there is no way in which a new worksheet in a spreadsheet could inherit or reuse the model of an existing worksheet. Copy-paste is then often used to compensate for for the lack of code abstractions [@Herm2013]. Finally, when faced with spreadsheets they do not know, users are often afraid to modify existing formulas, thus copy-paste them and add new functionality [@Herm2013] creating many versions of similar formulas, of which the origin can no longer be determined.
 
 <!-- should emphasize the copying here... --->
 
-Existing research has focused on  improving spreadsheets in this direction. An example of this is the work of Abraham _et al._ , who have developed a system called ClassSheets [@Enge2005] with which the structure of a spreadsheet can be described separately. The actual spreadsheet can then be guaranteed to conform to the meta description. 
+Existing research has focused on  improving spreadsheets in this direction. An example of this is the work of Engels _et al._ , who have developed a system called ClassSheets [@Enge2005] with which the structure of a spreadsheet can be described separately. The actual spreadsheet can then be guaranteed to conform to the meta description. 
 <!-- TODO: MDSheet -->
 Another direction is enriching spreadsheets with user-defined functions (UDFs) [@Jone2003]. In this case, spreadsheets users can factor out common computations into separate cells, and refer to them from elsewhere in the spreadsheet.
 
@@ -70,7 +73,7 @@ Although these features improve the reliability of spreadsheet use, they have on
 In this paper we introduce a different approach based on tracking copy-paste actions on formulas and transforming edits on copies ("clones") back to the original.
 So, instead of introducing another level of indirection using abstraction, our technique supports single-point-of-change by allowing users to edit equivalence classes of formulas, all at once. 
 In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. 
-Nevertheless, this technique eliminates a large class of copy-paste bugs, without at the same time comprimising the direct manipulation of formulas in cells.
+Nevertheless, this technique has the potential to eliminate a large class of copy-paste errors, without compromising the direct manipulation aspect that make spreadsheets so attractive.
 
 
 
@@ -106,6 +109,7 @@ The tracking relation induced by copy-paste actions, identifies which clones bel
 Therefore, editing one clone triggers updating the clones which belong to  the same  class.
 
 
+"Paste and match style"
 
 # Semantics of Copy-Paste Tracking
 
@@ -134,22 +138,20 @@ If the contents is a formula the origin relation is extended with $\langle c', c
 
 - Inserting/removing a row or column: after updating the sheet, the origin relation is adjusted so that cell addresses refer to their new locations. 
 For instance, when inserting a row  at position $i$, the row components of all the cell addresses on rows $\geq i$ in the origin relation needs to be shifted one down.
+In the case of removal, all pairs in the origin relation that contain coordinates on the removed row or column are removed.
 
 
 Although in this section we have just discussed copy-paste tracking for formulas, the same model could equally well apply to copy-pasting of data as well. In that case, the origin relation helps against inadvertently duplicating input data.
 
-An interesting special case is the particularly risky "paste as value" operation. 
+An interesting special case is the "paste as value" operation. 
 Instead of copying a formula, this operation copies the computed value, thus completely disconnecting the destination cell from its source.
 Tracking such copy-paste actions would probably not be very useful: editing the pasted value would incur computing the inverse of the original formula, and updating the input data accordingly! 
-In fact this brings us in the realm of bidirectional transformation and contraint maintenance [@Meertens] [@Lenses].
+In fact, this brings us right into the realm of bidirectional transformation and contraint maintenance [@Meertens] [@Lenses].
 
-
-## Prototype Implementation
 
 We've implemented the above semantics in  a spreadsheet simulator to (re)play interactive editing sessions with a spreadsheet. The code can be found online here: 
 
 > [https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet)
-
 
 
 <!--
@@ -173,7 +175,9 @@ Changes user interaction
 
 Related work for this paper comes in different categories, that we will summarize in this section.
 
-- *Origin tracking*: [@VanDeursenKT93] A similar application to copy-paste tracking is presented in [@InostrozaVdSE], where origin tracking is used to implemented editable regions on generated code. 
+- *Origin tracking*: Copy-paste tracking is directly inspired by *origin tracking* [@VanDeursenKT93].
+In general, origin tracking tries establish a relation between the input and ouput of some computational process, such as a compiler, or program transformation. Origin tracking, however, has numerous other applications in visualization, debugging, and traceability. 
+An application most similar to our work is presented in [@InostrozaVdSE], where origin tracking is used to implement editable regions on generated code. 
 
 - *Transclusion*:  Ted Nelson's concept of _transclusion_ [@Nelson65] is a form of "reference by inclusion" where transcluded data is presented through a "live" view: whenever the transcluded content is updated, the views are updated as well.
 Our origin relation provides a similar hyperlinking between cells. 
@@ -193,10 +197,13 @@ Future work
 
 Empirical evaluation which kind of copy is most used (?)
 
-Inferring origin relations to "migrate".
+User study?
 
+Inferring origin relations to "migrate" (although: there's no one formula that's special or singled out).
 
 Copy-paste tracking can generalized to a broader scope by seeing it as an example of abstractions that are materialized or referenced in multiple places in a runnning system.
+
+Duplication is ubiquitous is computation....
 
 Bidirectional transformation.
 
@@ -204,7 +211,7 @@ We give a tentative list of example which would merit further research.
 
 - Manipulating stack frames in a debugger view to change procedure definitions.
 
-- Use sites of procedures, classes, etc. vs their definitions
+- Use sites of variables, procedures, classes, etc. vs their declarations
 
 - Modifying style attributes of GUI elements which originate from a reusable abstraction.
 
