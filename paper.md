@@ -1,6 +1,6 @@
 ---
 title: | 
-   Copy-Paste Tracking in Spreadsheets: Supporting Reuse without Sacrificing Directness
+   E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste Tracking in Spreadsheets
 author:
   - name: Felienne Hermans
     affiliation: Delft University of Technology
@@ -23,6 +23,14 @@ bibliography: references.bib
 
 # Introduction
 
+<!--
+XanaSheet: Fixing Spreadsheets without Breaking Them
+Copy-Paste Tracking in Spreadsheets: Supporting Reuse without Compromising Directness
+Copy-Paste Tracking in Spreadsheets: Single Point of Change without Abstraction
+Copy-Paste Tracking in Spreadsheets: Once and Only Once without Abstraction
+E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste Tracking.
+-->
+ 
 
 Spreadsheet systems can easily be considered the most successful form of programming. Winston [@Wins2001] estimates that 90% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modelling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko[@Pank2006] estimates that 95% of U.S. firms, and 80% in Europe, use spreadsheets in some form for financial reporting.
 
@@ -59,9 +67,9 @@ Although these features improve the reliability of spreadsheet use, they have on
 In this paper we  introduce a different approach based on tracking formula copy actions and transforming edits on copies back to the original.
 The original is not modified directly,  within the context of their surrounding cells.
 
-So, instead of introducing levels of indirection via abstractions, XanaSheet supports reuse and sharing by allowing users to edit _equivalence classes_ of formulas. 
-In a sense, the abstraction, or user defined function, is there, but it it's never made explicit. 
-Nevertheless, this technique eliminates a large class of copy-paste bugs, without at the same time sacrificing the direct manipulation of formulas in cells.
+So, instead of introducing levels of indirection via abstractions, XanaSheet supports reuse and sharing by allowing users to edit equivalence classes of formulas, all at once. 
+In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. 
+Nevertheless, this technique eliminates a large class of copy-paste bugs, without at the same time comprimising the direct manipulation of formulas in cells.
 
 
 
@@ -70,20 +78,43 @@ Nevertheless, this technique eliminates a large class of copy-paste bugs, withou
 Without making the abstractions "concrete" as it were, we see the ranges for formulas as "materialization" of "platonic" (?) abstractions.
 The way to do this is tracking copying relations (origin tracking).
 Whenever a copy of a formula is edited, the original and all other copies are updated as well.
--->
-
 As a result, we conjecture, it is possible to have our cake and eat it too, and fix spreadsheets without breaking them.
+
+-->
 
 
 # XanaSheet in Action
 
 
-![*Maintaining consistency among clones of formulas through origin tracking*](images/grades.png)
+![*Maintaining consistency among clones of formulas through copy-paste tracking*](images/grades.png)
+
+Figure 1 shows an example user interaction with a XanaSheet containing student grades.
+In the first step  the sheet contains just the Lab and Exam grades of three students, and a formula for computing the average of the two grades.
+In the second step, the formula in cell D2 is copied to D3 and D4.
+D3 and D4 are clones of D2, and this relation is maintained by the system as an origin relation (visualized using the arrow). 
+In the third step, the clone in D4 is modified to apply rounding to the computed average. 
+Unlike in normal spreadsheets, however, this is not the end of the story
+and XanaSheet will reconcile the  original formula of D2 and the other clone in D3 according to the changes to D4. 
+
+A way to understand what is happening here, is to see spreadsheet formulas as materialized or unfolded abstractions.
+The abstraction in Fig. 1  is function for computing the average of two grades. 
+In ordinary programming such a function could, for instance, be mapped over a list of pairs of grades to obtain a list of averages, like `map(average, zip(Lab, Exam))`.
+In XanaSheet, the abstraction `average` does not really exist, but is represented collectively by the set of all its inlined applications: `[(Lab[0]+Exam[0])/ 2, (Lab[1]+Exam[1])/2, (Lab[2]+Exam[2])/2]`.
+In a  sense, each application is a clone of the same implicit prototype, with parameters filled in with concrete data.
+The tracking relation induced by copy-paste actions, identifies which clones belong to the same equivalence class.
+Therefore, editing one clone triggers updating the clones which belong to  the same  class.
+
+
+
+
+
+
+
 
 
 # A Model of XanaSheet
 
-We've developed a semantics for XanaSheet which can be used to simulate editing sessions with a spreadsheet. 
+We've developed a semantics for XanaSheet which can be used to simulate editing sessions with a spreadsheet [^1]. 
 For instance, the following script is used to build the initial sheet of Fig. 1:
 
 ~~~~
@@ -93,6 +124,8 @@ putData(<0, 0>, 6.0), putData(<0, 1>, 9.0), putData(<0, 2>, 5.0), // insert data
 putData(<1, 0>, 9.5), putData(<1, 1>, 7.0), putData(<1, 2>, 3.5),
 putFormula(<2, 0>, div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))) // add the formula
 ~~~~ 
+
+[^1]: The semantics is developed in Rascal [@Rascal] and can be found online here: [https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet)
 
 The "put" actions are anchored at absolute coordinates $\langle column, row\rangle$ (zero-based).
 Formula expressions are written in prefix notation. 
@@ -112,16 +145,20 @@ putFormula(<2, 2>, round(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0)))) // update 
 ~~~~
 
 Instead of just modifying a single location $loc$, the origin relation captures all locations that need to be updated. This set of locations is computed as follows:
-$\{loc\} \cup Org^+[loc] \cup (Org^+)^{-1}[Org^+[loc]]$.
+$(Org \cup Org^{-1})^*[loc]$.
+
+# Discussion
+
+Changes user interaction
+"Past and match style" "Delete only this event, or all future events?"
+
+
 
 
 # Related Work
 Related work for this paper comes in different categories, that we will summarize in this section.
 
 - Origin tracking: [@VanDeursenKT93] [@InostrozaVdSE]
-
-- Bidirectional transformation
-
 
 - Transclusion:  Ted Nelson's concept of _transclusion_ [@Nelson65] is a form of referencing or hyperlinking where references are actually little windows or views on the thing that's being referenced. 
 Whenever the original is updated, the references update as well.
@@ -136,6 +173,9 @@ Similar, but ... editing the reference will update the original, and as a conseq
 
 Future work
 
-Empirical evaluation which kind of copy is most used.
+Empirical evaluation which kind of copy is most used (?)
+
+Inferring origin relations to "migrate".
+
 
 # References
