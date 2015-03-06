@@ -1,6 +1,6 @@
 ---
 title: | 
-   XanaSheet: Fixing Spreadsheets without Breaking Them
+   Copy-Paste Tracking in Spreadsheets: Supporting Reuse without Sacrificing Directness
 author:
   - name: Felienne Hermans
     affiliation: Delft University of Technology
