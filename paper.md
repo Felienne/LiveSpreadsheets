@@ -30,6 +30,7 @@ Copy-Paste Tracking in Spreadsheets: Single Point of Change without Abstraction
 Copy-Paste Tracking in Spreadsheets: Once and Only Once without Abstraction
 E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste Tracking.
 One clone to rule them all.
+E Pluribus Unum: Many-to-One Direct Manipulation in Spreadsheets
 -->
  
 
@@ -66,7 +67,7 @@ Although these features improve the reliability of spreadsheet use, they have on
 
 
 In this paper we introduce a different approach based on tracking copy-paste actions on formulas and transforming edits on copies ("clones") back to the original.
-So, instead of introducing another level of indirection using abstraction, XanaSheet supports single-point-of-change by allowing users to edit equivalence classes of formulas, all at once. 
+So, instead of introducing another level of indirection using abstraction, our technique supports single-point-of-change by allowing users to edit equivalence classes of formulas, all at once. 
 In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. 
 Nevertheless, this technique eliminates a large class of copy-paste bugs, without at the same time comprimising the direct manipulation of formulas in cells.
 
@@ -82,32 +83,33 @@ As a result, we conjecture, it is possible to have our cake and eat it too, and 
 -->
 
 
-# XanaSheet in Action
+# Copy-Paste Tracking in Action
 
 
 ![*Maintaining consistency among clones of formulas through copy-paste tracking*](images/grades.png)
 
-Figure 1 shows an example user interaction with a XanaSheet containing student grades.
+Figure 1 shows an example user interaction with a spreadsheet containing student grades.
 In the first step  the sheet contains just the Lab and Exam grades of three students, and a formula for computing the average of the two grades in D2.
 In the second step, the formula in cell D2 is copied to D3 and D4.
 D3 and D4 are clones of D2, and this relation is maintained by the system as an origin relation (visualized using the arrow). 
 In the third step, the clone in D4 is modified to apply rounding to the computed average. 
 Unlike in normal spreadsheets, however, this is not the end of the story
-and XanaSheet will reconcile the  original formula of D2 and the other clone in D3 with the changes in D4. 
+and the system will reconcile the  original formula of D2 and the other clone in D3 with the changes in D4. 
 
 A way to understand what is happening here, is to see spreadsheet formulas as materialized or unfolded abstractions.
 The abstraction in Fig. 1  is function `average(x,y)` for computing the average of two grades. 
 In ordinary programming such a function could, for instance, be mapped over a list of pairs of grades to obtain a list of averages, like `map(average, zip(Lab, Exam))`.
-In XanaSheet, the abstraction `average` does not really exist, but is represented collectively by the set of all its inlined applications, e.g. `[(Lab[0]+Exam[0])/ 2, (Lab[1]+Exam[1])/2, (Lab[2]+Exam[2])/2]`.
+In the spreadsheet of Fig. 1, however, the abstraction `average` does not really exist, but is represented collectively by the set of all its inlined applications, e.g. `[(Lab[0]+Exam[0])/ 2, (Lab[1]+Exam[1])/2, (Lab[2]+Exam[2])/2]`.
 In a  sense, each application is a clone of the same implicit prototype, with parameters filled in with concrete data references.
 The tracking relation induced by copy-paste actions, identifies which clones belong to the same equivalence class.
 Therefore, editing one clone triggers updating the clones which belong to  the same  class.
 
 
 
-# A Model of XanaSheet
+# Semantics of Copy-Paste Tracking
 
-We've developed an executable semantics for XanaSheet which can be used to simulate editing sessions with a spreadsheet [^1]. 
+We've developed an executable semantics for experimenting with copy-paste tracking.
+It can be used to simulate interactive editing sessions with a spreadsheet [^1]. 
 For instance, the following script is used to build the initial sheet of Fig. 1:
 
 ~~~~
@@ -118,7 +120,8 @@ For instance, the following script is used to build the initial sheet of Fig. 1:
 
 The `put` actions are anchored at absolute, zero-based coordinates $\langle column, row\rangle$.
 Formula expressions are written in prefix notation. 
-The `ref` expression is a relative cell reference, where the numbers indicate column resp. row offsets from the current cell. 
+Addition is represented by the `add` constructor, division by `div`, and literals by `lit`. 
+The `ref` expression is a relative cell reference, where the numbers indicate column and row offsets from the current cell, respectively. 
 
 To model copy-paste tracking, `copy` actions are explicitly modeled.
 For instance, the following two actions copy the formula for computing the average in D2 down to D3 and D4[^2]: 
@@ -138,17 +141,22 @@ This is modeled again using a `putFormula` action:
   putFormula(<2, 2>, round(div(add(ref(-2, 0), ref(-1, 0)), lit(2.0))))`.
 ~~~~
 
-Since this update is applied to a copied formula, the origin relation is used to find all cells in the same equivalence class as the current one.
+Since this update is applied to a cell containing a formula clone, the origin relation is used to find all cells which are in the same equivalence class as the current one.
 The equivalence class of a cell $c$ is defined as $[c]_{Org} = \{\; c' \;|\; \langle c, c'\rangle \in (Org \cup Org^{-1})^* \;\}$.
 That is the set of cells in the equivalence class of $c$ is the right-image under $c$ in the symmetric, transitive, and reflexive closure of the origin relation.
 Since all cell references in expressions are relative, the new formula of in the `putFormula` action can be just copied to all cells in the equivalence class. 
 
 Entering data and formulas, and copy-pasting cells are not the only operations in spreadsheets. 
-For the puprose of copy-paste tracking, however, the only two other relevant operations are inserting or removing rows and columns. 
+For the purpose of copy-paste tracking, however, the only two other relevant operations are inserting or removing rows and columns. 
 In these cases, the origin relation needs to be adjusted as well. 
-For instance, when inserting a row  at position $i$, the row components of all the cell addresses on rows $>= i$ in the origin relation needs to be shifted one down.
+For instance, when inserting a row  at position $i$, the row components of all the cell addresses on rows $\geq i$ in the origin relation needs to be shifted one down.
 Similar adjustments need to be made when inserting a column or deleting a row or column.
 
+Although in this section we have just discussed copy-paste tracking for formulas, the same model could equally well apply to copy-pasting of data as well. In that case, the origin relation helps against inadvertently duplicating input data.
+
+An interesting special case is particularly error-prone "paste as value" operation. 
+Instead of copying the formula, this operation copies the result of the formula, thus completely disconnecting the value from its original source.
+Tracking such copy-paste actions would probably not be very useful: editing the pasted value would incur computing the inverse of the original formula, and updating the input data accordingly!
 
 
 [^1]: The semantics is developed in Rascal [@Rascal] and can be found online here: [https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet)
@@ -157,26 +165,27 @@ Similar adjustments need to be made when inserting a column or deleting a row or
 [^2]: Note that we don't count the header row as an actual row in this formalization.
 
 
+<!--
 # Discussion
-
 Changes user interaction
 "Past and match style" "Delete only this event, or all future events?"
-
+-->
 
 
 
 # Related Work
+
 Related work for this paper comes in different categories, that we will summarize in this section.
 
-- Origin tracking: [@VanDeursenKT93] [@InostrozaVdSE]
+- *Origin tracking*: [@VanDeursenKT93] [@InostrozaVdSE]
 
-- Transclusion:  Ted Nelson's concept of _transclusion_ [@Nelson65] is a form of referencing or hyperlinking where references are actually little windows or views on the thing that's being referenced. 
-Whenever the original is updated, the references update as well.
-Similar, but ... editing the reference will update the original, and as a consequence all other references are updated as well. 
+- *Transclusion*:  Ted Nelson's concept of _transclusion_ [@Nelson65] is a form of "reference by inclusion" where transcluded data is presented through a "live" view: whenever the target of the reference is updated, the references themselves update as well.
+Our origin relation provides a similar hyperlinking between cells. 
+But unlike in the case of transclusion, the relation is bidirectional: changes to the original are propagated forward, but changes to copies (references) are also propagated backwards (and then forward again). 
 
-- Clone tracking in software
+- *Clone tracking* in software: **Felienne, kun jij dit ophoesten?**
 
-- Prototype-based inheritance
+- *Prototype-based inheritance* was poineered in the Self language [@Self], and contributed to direct manipulation model of interaction [@Malo95]. In proto-type-based languages, objects are created by cloning and existing object. The cloned object then inherits features (methods, slots) from its prototype. This parent relation between object is similar to our origin relation. However, we are not aware of any related work discussing propagating changes on clones back to the parents. 
 
 
 # Conclusion
