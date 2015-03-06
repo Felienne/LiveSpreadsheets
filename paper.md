@@ -183,7 +183,8 @@ Related work for this paper comes in different categories, that we will summariz
 Our origin relation provides a similar hyperlinking between cells. 
 But unlike in the case of transclusion, the relation is bidirectional: changes to the original are propagated forward, but changes to copies (references) are also propagated backwards (and then forward again). 
 
-- *Clone tracking* in software: **Felienne, kun jij dit ophoesten?**
+- *Clone tracking* in software: Godfrey and Tu [@Godf2002] proposed a method called _origin analysis_ which is a related to both clone detection and the above described origin tracking, but aims at deciding if a program entity was newly introduced or whether it if it should more accurately be viewed as a renamed, moved, or otherwise changed version of an previously existing entity. This laid the ground for a tool called _CloneTracker_ that "can automatically track clones as the code evolves, notify developers of modifications to clone
+regions, and support simultaneous editing of clone regions." [@Dual2007].
 
 - *Prototype-based inheritance* was poineered in the Self language [@Self], and contributed to direct manipulation model of interaction [@Malo95]. In proto-type-based languages, objects are created by cloning and existing object. The cloned object then inherits features (methods, slots) from its prototype. This parent relation between object is similar to our origin relation. However, we are not aware of any related work discussing propagating changes on clones back to the parents. 
 
