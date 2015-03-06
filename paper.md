@@ -119,21 +119,23 @@ Here we discuss how copy-paste tracking could be implemented.
 A spreadsheet is a rectangular grid of cells where each cell is identified by its *address*, which are pairs $(column, row)$ consisting of zero-based column and row coordinates.
 User actions always operate on one of more of these addresses.
 The origin relation between cells is then modeled as a binary relation between such address. For instance, the relation $Org = \{\langle ( 2,2),( 2,0)\rangle,\langle ( 2,1),( 2,0)\rangle\}$ captures the origin relation visualized in Figure 1 (2) [^2]. 
-In this case, the relation states that the formulas in cell $( 2,2)$ and cell $( 2, 1)$ both originate from  cell $(2,0)$.
+In this case, the relation states that the formulas in cell $( 2,2)$ and cell $( 2, 1)$ are copied from cell $(2,0)$.
 
 
 Interacting with the spreadsheet not only updates the sheet itself, but also maintains the origin relation. We describe the effect of the most relevant edit operations on a cell $c$:
 
 - Copying cell $c$ to $c'$: The contents of $c$ is copied to $c'$. 
-If the contents is a formula the origin relation needs to be extended.
-If $c$ has an origin $c''$, add  $\langle c', c''\rangle$, else add $\langle c', c\rangle$.
-This ensures that the origin relation is always transitively closed.
+If the contents is a formula the origin relation needs to be updated as well.
+First, if $c'$ has an existing origin, the corresponding pair is removed from the relation.
+Then the relation is extended based on the current copy operation: if $c$ has an origin $c''$, add  $\langle c', c''\rangle$, else add $\langle c', c\rangle$.
+The check for the origin of $c$ ensures that the origin relation is always transitively closed.
 
 - Entering a formula: 
 If $c$ does not  participate in any origin relation, it is is simply updated with the new formula. 
-Otherwise, $c$ has a single origin, say $c'$, the cells that need to be updated are $\{ c, c'\} \cup \{\; c'' \;|\; \langle c'', c'\rangle \in Org \;\}$.
+Otherwise, $c$ has a single origin, say $c'$, and the cells that need to be updated are $\{ c, c'\} \cup \{ c'' \;|\; \langle c'', c'\rangle \in Org \}$.
+In other words, both $c$ itself, the source $c'$ it was copied from , and all other copies $c''$ originating in $c'$ are updated.
 
-- Entering data: the sheet is updated with the new data. All pairs containing $c$ are removed from the origin relation.
+- Entering data: the sheet is updated with the new data. All pairs containing $c$, either as source or target, are removed from the origin relation.
 
 - Inserting/removing a row or column: after updating the sheet, the origin relation is adjusted so that cell addresses refer to their new locations. 
 For instance, when inserting a row  at position $i$, the row components of all the cell addresses on rows $\geq i$ in the origin relation needs to be shifted one down.
