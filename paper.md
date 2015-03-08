@@ -72,8 +72,8 @@ Existing research has focused on  improving spreadsheets in this direction. An e
 
 Although these features improve the reliability of spreadsheet use, they have one important drawback, namely, that they break the "direct manipulation" aspect of spreadsheets. In a sense, separate meta models, or user defined abstractions, create distance between the actual user's artifact (data + formulas), and its behavior. Instead of just looking at the cells, the user now has to inspect at least two places: the cells containing the data and the the separate definitions of the abstractions (meta model and/or user defined functions). 
 
-In this paper we propose another method to add abstraction, without diminishing the directness. We use _origin tracking techniques_  to maintain a live connection between source and destination of copy-paste actions. Whenever a copied formula is edited, the modifications are transformed and replayed on t the original and all other copies. 
-So, instead of introducing another level of indirection using abstraction, our technique allows users to edit classes of formulas, all at once. 
+In this paper we propose XanaSheet: an alternative method to add abstraction, without diminishing the directness. In XanaSheet, we use _origin tracking techniques_  to maintain a live connection between source and destination of copy-paste actions. Whenever a copied formula is edited, the modifications are transformed and replayed on the original and all other copies. 
+Instead of introducing another level of indirection using abstraction, XanaSheet allows users to edit classes of formulas, all at once. 
 In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. By retaining ease of use, this technique has the potential to eliminate a large class of copy-paste errors, without compromising the direct manipulation aspect that make spreadsheets so attractive.
 
 <!--
@@ -106,8 +106,7 @@ In a  sense, each application is a clone of the same implicit prototype, with pa
 The tracking relation induced by copy-paste actions, identifies which clones belong to the same equivalence class.
 Therefore, editing one clone triggers updating the clones which belong to  the same  class.
 
-In some cases it might actually not be desired to maintain the origin links between source and destination of copy-paste actions. 
-Our system could support these situations by providing a special "Paste and Detach" action which severs the copy from its original (similar to "Past and Match Style" common in many text editing systems).
+In some cases it might actually not be desired to maintain the origin links between source and destination of copy-paste actions. XanaSheet supports these situations by providing a special "Paste and Detach" action which severs the copy from its original (similar to "Past and Match Style" common in many text editing systems).
 The example also assumes that when a user edits a formula she always intends to edit the whole class of clones. However, the system allows the user to edit only this copy, or all copies at once (similar to changing "Recurring events" in calendar applications).
 
 <!-- 
@@ -117,11 +116,8 @@ What the default behavior of editing and copying should be, remains a question f
 
 # Semantics of Copy-Paste Tracking
 
-The previous section introduced copy-paste tracking from the perspective of the user. 
-Here we discuss how copy-paste tracking could be implemented.
-We've implemented an executable semantics of copy-paste tracking for simulating interactive editing sessions with a spreadsheet. The code can be found online here: 
+The previous section introduced copy-paste tracking from the perspective of the user. We are currently working to implement this method in a tool called XanaSheet. In this section we describe our considerations regarding the implementation. We implemented an executable semantics of copy-paste tracking for simulating interactive editing sessions with a spreadsheet. The code can be found online here: 
 [https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet).
-
 
 A spreadsheet is a rectangular grid of cells where each cell is identified by its *address*, which are pairs $An$ consisting of a column letter $A$ and a row index $n$.
 User actions always operate on one of more of these addresses.
@@ -215,8 +211,7 @@ They adhere to the powerful direct manipulation style of simultaneously editing 
 Nevertheless, spreadsheets are known to be extremely fault-prone, mainly because users have to  use copy-paste instead of user defined abstractions.
 Existing research has tried to improve spreadsheets by introducing abstractions such as meta models or user defined functions, but this compromises the direct manipulation aspect that makes spreadsheets so attractive in the first place.
 
-In this paper we propose copy-paste tracking as way to both have our cake and eat it too. 
-Instead of introducing another level of indirection, copy-paste tracking supports editing classes of formulas originating at the same source, all at once. 
+In this paper we propose XanaSheet: copy-paste tracking as way to both have our cake and eat it too. Instead of introducing another level of indirection, copy-paste tracking supports editing classes of formulas originating at the same source, all at once. 
 As a result, we get the benefits of abstraction (reuse, sharing, "single-point-of-change"), without the incurring the burden of cognitive distance. 
 
 *Outlook* Duplication of knowledge is ubiquitous is computing. Copy-paste tracking can generalized to a broader scope by seeing it as an example of abstractions that are presented to the user in a materialized, expanded, unrolled, referenced, or instantiated state.
