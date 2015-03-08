@@ -11,9 +11,7 @@ author:
 abstract: |
   Spreadsheets are the most popular live programming environments, but they are also notoriously fault-prone.
   One reason for this is that users actively rely on copy-paste to  make up for the lack of abstraction mechanisms.
-  Adding such mechanisms, however, introduces indirection and  cognitive distance.
-  Copy-paste tracking allows users to directly edit copy-pasted formulas, but instead of changing only this single instance, the changes will be propagated to all formulas copied from the same source. 
-  As a result, spreadsheet users may enjoy the benefits of abstraction without its drawbacks.
+  Adding abstraction however, introduces indirection and thus cognitive distance. In this paper we propose an alternative: copy-paste tracking . Tracking copies that spreadsheet users make, allows them to directly edit copy-pasted formulas, but instead of changing only this single instance, the changes will be propagated to all formulas copied from the same source. As a result, spreadsheet users will enjoy the benefits of abstraction without its drawbacks.
   
 fontsize: 11pt
 geometry: margin=2cm
@@ -55,7 +53,7 @@ The liveness characteristics of spreadsheets can be divided in two categories:
 
 - Direct manipulation: instead of editing a separate plan or program to achieve some result, the spreadsheet user edits the "thing itself": there is almost no distinction between the actual data and the "code" of a spreadsheet. This feature addresses the "gulf of execution" which exists between the user's goal, and the steps that are required to achieve that goal [@norman1986cognitive].
 
-- Immediate feedback: after a change to the spreadsheet data or formulas, the user can immediately observe the effect of the edit. This feature bridges the "gulf of evaluation"which exists between performing an action and receiving feedback on the success of that action [@norman1986cognitive].
+- Immediate feedback: after a change to the spreadsheet data or formulas, the user can immediately observe the effect of the edit. This feature bridges the "gulf of evaluation" which exists between performing an action and receiving feedback on the success of that action [@norman1986cognitive].
 
 
 
@@ -70,20 +68,13 @@ This copy-pasting as in the stories above is not always done by mistake. Rather,
 
 <!-- should emphasize the copying here... --->
 
-Existing research has focused on  improving spreadsheets in this direction. An example of this is the work of Engels _et al._ , who have developed a system called ClassSheets [@Enge2005] with which the structure of a spreadsheet can be described separately. The actual spreadsheet can then be guaranteed to conform to the meta description. 
-<!-- TODO: MDSheet -->
-Another direction is enriching spreadsheets with user-defined functions (UDFs) [@Jone2003]. In this case, spreadsheets users can factor out common computations into separate cells, and refer to them from elsewhere in the spreadsheet.
+Existing research has focused on  improving spreadsheets in this direction. An example of this is the work of Engels _et al._ , who have developed a system called ClassSheets [@Enge2005] with which the structure of a spreadsheet can be described separately. The actual spreadsheet can then be guaranteed to conform to the meta description. Another direction is enriching spreadsheets with user-defined functions (UDFs) [@Jone2003]. In this case, spreadsheets users can factor out common computations into separate cells, and refer to them from elsewhere in the spreadsheet. <!-- TODO: MDSheet -->
 
-Although these features improve the reliability of spreadsheet use, they have one important drawback, namely, that they break the "direct manipulation" aspect of spreadsheets. In a sense, separate meta models, or user defined abstractions, create distance between the actual thing (data + formulas), and its behavior. Instead of just looking at the cells, the user now has to look at at least two places: the cells containing the data and the the separate definitions of the abstractions (meta model and/or user defined functions). 
+Although these features improve the reliability of spreadsheet use, they have one important drawback, namely, that they break the "direct manipulation" aspect of spreadsheets. In a sense, separate meta models, or user defined abstractions, create distance between the actual user's artifact (data + formulas), and its behavior. Instead of just looking at the cells, the user now has to inspect at least two places: the cells containing the data and the the separate definitions of the abstractions (meta model and/or user defined functions). 
 
-
-In this paper we propose to use origin  tracking techniques to maintain live links between source and destination of copy-paste actions. Whenever a copied formula is edited, the modifications are transformed and replayed on t the original and all other copies. 
+In this paper we propose another method to add abstraction, without diminishing the directness. We use _origin tracking techniques_  to maintain a live connection between source and destination of copy-paste actions. Whenever a copied formula is edited, the modifications are transformed and replayed on t the original and all other copies. 
 So, instead of introducing another level of indirection using abstraction, our technique allows users to edit classes of formulas, all at once. 
-In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. 
-Nevertheless, this technique has the potential to eliminate a large class of copy-paste errors, without compromising the direct manipulation aspect that make spreadsheets so attractive.
-
-
-
+In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. By retaining ease of use, this technique has the potential to eliminate a large class of copy-paste errors, without compromising the direct manipulation aspect that make spreadsheets so attractive.
 
 <!--
 Without making the abstractions "concrete" as it were, we see the ranges for formulas as "materialization" of "platonic" (?) abstractions.
@@ -115,11 +106,9 @@ In a  sense, each application is a clone of the same implicit prototype, with pa
 The tracking relation induced by copy-paste actions, identifies which clones belong to the same equivalence class.
 Therefore, editing one clone triggers updating the clones which belong to  the same  class.
 
-
 In some cases it might actually not be desired to maintain the origin links between source and destination of copy-paste actions. 
-The system could support these situations by providing a special "Paste and Detach" action which severs the copy from its original (similar to "Past and Match Style").
-The example also assumes that when a user edits a formula she always intends to edit the whole class of clones. 
-However, the system could allow the user to chose to edit only this copy, or all copies at once (similar to changing "Recurring events" in calendar applications).
+Our system could support these situations by providing a special "Paste and Detach" action which severs the copy from its original (similar to "Past and Match Style" common in many text editing systems).
+The example also assumes that when a user edits a formula she always intends to edit the whole class of clones. However, the system allows the user to edit only this copy, or all copies at once (similar to changing "Recurring events" in calendar applications).
 
 <!-- 
 What the default behavior of editing and copying should be, remains a question for further research.
@@ -144,10 +133,7 @@ Without loss of generality we assume users only use relative cell referencing in
 For instance, the reference to `B2` in Fig. 1 (1) is a relative cell reference, is represented as `C-2R0` ("two columns left, same row").
 Relative cell referencing allows formulas to be moved around across the grid without having to adjust explicit column names or row indices.
 
-
 Interacting with the spreadsheet not only updates the sheet itself, but also maintains the origin relation. We describe the effect of the most relevant edit operations on a cell $c$:
-
-
 
 - *Entering a formula*: 
 If $c$ does not  participate in any origin relation, it is is simply updated with the new formula, and the origin relation is updated with $\langle c, c\rangle$ to model the fact that a new formula is its own origin.
@@ -167,11 +153,10 @@ In the case of removal, all pairs in the origin relation that contain coordinate
 
 - *Entering data*: cell $c$ is updated with the new data. All pairs containing $c$, either as source or target, are removed from the origin relation.
 
-
 Note that copying a cell $c$ to $c'$ removes the origin entries of $c'$ (if any).
 An alternative design could interpret copying a formula as a modification of the destination cell, and thus update all cells in the class of $c'$. In that case all such cells would get $c$ as their new origin.
 
-Although in this section we have just discussed copy-paste tracking for formulas, the same model could equally well apply to copy-pasting of data as well. In that case, the origin relation helps against inadvertently duplicating input data.
+Although in this section we have just discussed copy-paste tracking for formulas, the same model can be applied equally well to copy-pasting of data. In that case, the origin relation helps against inadvertently duplicating input data.
 An interesting special case is the "paste as value" operation. 
 Instead of copying a formula, this operation copies the computed value, thus completely disconnecting the destination cell from its source.
 Tracking such copy-paste actions would probably not be very useful: editing the pasted value would incur computing the inverse of the original formula, and updating the input data accordingly! 
@@ -230,12 +215,11 @@ They adhere to the powerful direct manipulation style of simultaneously editing 
 Nevertheless, spreadsheets are known to be extremely fault-prone, mainly because users have to  use copy-paste instead of user defined abstractions.
 Existing research has tried to improve spreadsheets by introducing abstractions such as meta models or user defined functions, but this compromises the direct manipulation aspect that makes spreadsheets so attractive in the first place.
 
-In this paper we proposed copy-paste tracking as way to both have our cake and eat it too. 
+In this paper we propose copy-paste tracking as way to both have our cake and eat it too. 
 Instead of introducing another level of indirection, copy-paste tracking supports editing classes of formulas originating at the same source, all at once. 
 As a result, we get the benefits of abstraction (reuse, sharing, "single-point-of-change"), without the incurring the burden of cognitive distance. 
 
-*Outlook* Duplication of knowledge is ubiquitous is computing.
-Copy-paste tracking can generalized to a broader scope by seeing it as an example of abstractions that are presented to the user in a materialized, expanded, unrolled, referenced, or instantiated state.
+*Outlook* Duplication of knowledge is ubiquitous is computing. Copy-paste tracking can generalized to a broader scope by seeing it as an example of abstractions that are presented to the user in a materialized, expanded, unrolled, referenced, or instantiated state.
 The relation between such views and the original is often many-to-one and the views are often read only. 
 Copy-paste tracking could provide a model to make such user views of abstractions editable. 
 Thus, copy-paste tracking in its most general form improves direct manipulation in interactive systems and allows users to maintain abstractions through their multiple concretizations.
