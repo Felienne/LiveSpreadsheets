@@ -211,7 +211,7 @@ Thus, copy-paste tracking in its most general form supports direct manipulation 
 We conclude by providing a tentative list of examples where similar ideas could be applied: 
 
 
-"Duplication" (many) | "Source" (one)
+"Copy" (many) | "Source" (one)
 ------------------+---------------
 Reference | Declaration
 Stack frame | Procedure call
