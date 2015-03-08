@@ -1,6 +1,6 @@
 ---
 title: | 
-  Copy-Paste Tracking in Spreadsheets: Single Point of Change without Compromising Direct Manipulation 
+  Live Copy-Paste in Spreadsheets  
 author:
   - name: Felienne Hermans
     affiliation: Delft University of Technology
@@ -35,6 +35,8 @@ E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste
   Copy-Paste Tracking in Spreadsheets: Single Point of Change without Compromising Direct Manipulation 
   Live Copy-Paste in Spreadsheets
   Turning duplication into an asset
+  Emergen Abstraction
+  Two flies with one stone: abstraction and directness in spreadsheets
   -->
  
 
