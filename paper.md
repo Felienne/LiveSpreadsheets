@@ -1,6 +1,6 @@
 ---
 title: | 
-  Live Copy-Paste in Spreadsheets  
+  Copy-Paste Tracking: Fixing Spreadsheets Without Breaking Them
 author:
   - name: Felienne Hermans
     affiliation: Delft University of Technology
@@ -72,8 +72,7 @@ Another direction is enriching spreadsheets with user-defined functions (UDFs) [
 Although these features improve the reliability of spreadsheet use, they have one important drawback, namely, that they break the "direct manipulation" aspect of spreadsheets. In a sense, separate meta models, or user defined abstractions, create distance between the actual thing (data + formulas), and its behavior. Instead of just looking at the cells, the user now has to look at at least two places: the cells containing the data and the the separate definitions of the abstractions (meta model and/or user defined functions). 
 
 
-In this paper we propose to use origin  tracking techniques to maintain live links between source and destination of copy-paste actions.  
-Whenever a copied formula is edited, the modifications are transformed and replayed on t the original and all other copies. 
+In this paper we propose to use origin  tracking techniques to maintain live links between source and destination of copy-paste actions. Whenever a copied formula is edited, the modifications are transformed and replayed on t the original and all other copies. 
 So, instead of introducing another level of indirection using abstraction, our technique allows users to edit classes of formulas, all at once. 
 In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. 
 Nevertheless, this technique has the potential to eliminate a large class of copy-paste errors, without compromising the direct manipulation aspect that make spreadsheets so attractive.
@@ -126,6 +125,9 @@ What the default behavior of editing and copying should be, remains a question f
 
 The previous section introduced copy-paste tracking from the perspective of the user. 
 Here we discuss how copy-paste tracking could be implemented.
+We've implemented an executable semantics of copy-paste tracking for simulating interactive editing sessions with a spreadsheet. The code can be found online here: 
+[https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet).
+
 
 A spreadsheet is a rectangular grid of cells where each cell is identified by its *address*, which are pairs $An$ consisting of a column letter $A$ and a row index $n$.
 User actions always operate on one of more of these addresses.
@@ -141,35 +143,39 @@ Relative cell referencing allows formulas to be moved around across the grid wit
 Interacting with the spreadsheet not only updates the sheet itself, but also maintains the origin relation. We describe the effect of the most relevant edit operations on a cell $c$:
 
 
-- Entering a formula: 
-If $c$ does not  participate in any origin relation, it is is simply updated with the new formula. 
-Otherwise, $c$ has a single origin, say $c'$, and the cells that need to be updated are $\{ c, c'\} \cup \{ c'' \;|\; \langle c'', c'\rangle \in Org \}$.
-In other words, both $c$ itself, the source $c'$ it was copied from , and all other copies $c''$ originating in $c'$ are updated.
 
-- Copying cell $c$ to $c'$: The contents of $c$ is copied to $c'$. 
-If the contents is a formula the origin relation needs to be updated as well.
-First, if $c'$ has an existing origin, the corresponding pair is removed from the relation. **TODO: alternastive : update class of existing origin**
+- *Entering a formula*: 
+If $c$ does not  participate in any origin relation, it is is simply updated with the new formula, and the origin relation is updated with $\langle c, c\rangle$ to model the fact that a new formula is its own origin.
+As a result, the origin relation is always reflexively closed.
+Otherwise, $c$ has an origin, say $c'$, and the cells that need to be updated are $\{ c'' \;|\; \langle c'', c'\rangle \in Org \}$.
+By definition, this includes cell $c$, and, by reflexivity of $Org$, the source cell $c'$ as well. .
+
+- *Copying cell $c$ to $c'$*: The contents of $c$ is copied to $c'$. 
+If the contents is a formula,  the origin relation needs to be updated as well.
+First, if $c'$ has an existing origin, the corresponding pair is removed from the relation. 
 Then the relation is extended based on the current copy operation: if $c$ has an origin $c''$, add  $\langle c', c''\rangle$, else add $\langle c', c\rangle$.
 The check for the origin of $c$ ensures that the origin relation is always transitively closed.
 
-- Entering data: cell $c$ is updated with the new data. All pairs containing $c$, either as source or target, are removed from the origin relation.
-
-- Inserting/removing a row or column: after updating the sheet, the origin relation is adjusted so that cell addresses refer to their new locations. 
+- *Inserting/removing a row or column*: after updating the sheet, the origin relation is adjusted so that cell addresses refer to their new locations. 
 For instance, when inserting a row  at position $i$, the row components of all the cell addresses on rows $\geq i$ in the origin relation needs to be shifted one down.
 In the case of removal, all pairs in the origin relation that contain coordinates on the removed row or column are removed.
 
+- *Entering data*: cell $c$ is updated with the new data. All pairs containing $c$, either as source or target, are removed from the origin relation.
+
+
+Note that copying a cell $c$ to $c'$ removes the origin entries of $c'$ (if any).
+An alternative design could interpret copying a formula as a modification of the destination cell, and thus update all cells in the class of $c'$. In that case all such cells would get $c$ as their new origin.
 
 Although in this section we have just discussed copy-paste tracking for formulas, the same model could equally well apply to copy-pasting of data as well. In that case, the origin relation helps against inadvertently duplicating input data.
-
 An interesting special case is the "paste as value" operation. 
 Instead of copying a formula, this operation copies the computed value, thus completely disconnecting the destination cell from its source.
 Tracking such copy-paste actions would probably not be very useful: editing the pasted value would incur computing the inverse of the original formula, and updating the input data accordingly! 
+
+<!--
 In fact, this brings us right into the realm of bidirectional transformation and contraint maintenance [@Meertens] [@Lenses].
+-->
 
 
-We've implemented the above semantics in  a spreadsheet simulator to (re)play interactive editing sessions with a spreadsheet. The code can be found online here: 
-
-> [https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet)
 
 
 <!--
@@ -191,22 +197,25 @@ Changes user interaction
 
 # Related Work
 
-Related work for this paper comes in different categories, that we will summarize in this section.
+Copy-paste tracking is a simple technique that is inspired by similar concepts in domains as diverse as term rewriting, hypertext, clone detection, prototypical inheritance , and view maintenance. Below we briefly summarize representative related work in those areas.
 
-- *Origin tracking*: Copy-paste tracking is directly inspired by *origin tracking* [@VanDeursenKT93].
+*Origin tracking*: Copy-paste tracking is directly inspired by *origin tracking* [@VanDeursenKT93].
 In general, origin tracking tries establish a relation between the input and ouput of some computational process, such as a compiler, or program transformation. Origin tracking, however, has numerous other applications in visualization, debugging, and traceability. 
 An application most similar to our work is presented in [@InostrozaVdSE], where origin tracking is used to implement editable regions on generated code. 
 
-- *Transclusion*:  Ted Nelson's concept of _transclusion_ [@Nelson65] is a form of "reference by inclusion" where transcluded data is presented through a "live" view: whenever the transcluded content is updated, the views are updated as well.
+
+*Transclusion*:  Ted Nelson's concept of _transclusion_ [@Nelson65] is a form of "reference by inclusion" where transcluded data is presented through a "live" view: whenever the transcluded content is updated, the views are updated as well.
 Our origin relation provides a similar hyperlinking between cells. 
 But unlike in the case of transclusion, the relation is bidirectional: changes to the original are propagated forward, but changes to copies (references) are also propagated backwards (and then forwards again). 
 
-- *Clone tracking* in software: Godfrey and Tu [@Godf2002] proposed a method called _origin analysis_ which is a related to both clone detection and the above described origin tracking, but aims at deciding if a program entity was newly introduced or whether it if it should more accurately be viewed as a renamed, moved, or otherwise changed version of an previously existing entity. This laid the ground for a tool called _CloneTracker_ that "can automatically track clones as the code evolves, notify developers of modifications to clone
+*Clone tracking* in software: Godfrey and Tu [@Godf2002] proposed a method called _origin analysis_ which is a related to both clone detection and the above described origin tracking, but aims at deciding if a program entity was newly introduced or whether it if it should more accurately be viewed as a renamed, moved, or otherwise changed version of an previously existing entity. This laid the ground for a tool called _CloneTracker_ that "can automatically track clones as the code evolves, notify developers of modifications to clone
 regions, and support simultaneous editing of clone regions." [@Dual2007].
 
-- *Prototype-based inheritance*: Lieberman introduced prototypes to implement shared behavior in object-oriented programming. In proto-type-based languages, objects are created by cloning and existing object. 
+*Prototype-based inheritance*: Lieberman introduced prototypes to implement shared behavior in object-oriented programming. In proto-type-based languages, objects are created by cloning and existing object. 
 The cloned object then inherits features (methods, slots) from its prototype. 
 Prototype-based inheritance contributed to the direct manipulation model of interaction [@Malo95]. The parent relation between objects is similar to our origin relation. However, we are not aware of any related work using this relation to propagate changes to clones back to their parents. 
+
+*Bidirectional transformation*: one way to look at copy-paste tracking is to see copies as views on the original formula similar to views in database systems. In particular, the copies are *updateable* views [@bancilhon1981update]. Different manifestations of the view update problem have received considerable attention recently in the context of *lenses* [@Lenses]  and bidirectional transformation [@BX]. In the context of user interfaces these concepts were pioneered by Meertens under the header of "constraint maintenance" [@Meertens]. In a certain sense, copy-paste tracking supports a very basic class of constraint maintenance where clones are simply synchronized to be equal.
 
 
 # Conclusion
