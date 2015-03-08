@@ -72,8 +72,9 @@ Another direction is enriching spreadsheets with user-defined functions (UDFs) [
 Although these features improve the reliability of spreadsheet use, they have one important drawback, namely, that they break the "direct manipulation" aspect of spreadsheets. In a sense, separate meta models, or user defined abstractions, create distance between the actual thing (data + formulas), and its behavior. Instead of just looking at the cells, the user now has to look at at least two places: the cells containing the data and the the separate definitions of the abstractions (meta model and/or user defined functions). 
 
 
-In this paper we introduce a different approach based on tracking copy-paste actions on formulas and transforming edits on copies ("clones") back to the original.
-So, instead of introducing another level of indirection using abstraction, our technique supports single-point-of-change by allowing users to edit equivalence classes of formulas, all at once. 
+In this paper we propose to use origin  tracking techniques to maintain live links between source and destination of copy-paste actions.  
+Whenever a copied formula is edited, the modifications are transformed and replayed on t the original and all other copies. 
+So, instead of introducing another level of indirection using abstraction, our technique allows users to edit classes of formulas, all at once. 
 In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. 
 Nevertheless, this technique has the potential to eliminate a large class of copy-paste errors, without compromising the direct manipulation aspect that make spreadsheets so attractive.
 
@@ -111,33 +112,47 @@ The tracking relation induced by copy-paste actions, identifies which clones bel
 Therefore, editing one clone triggers updating the clones which belong to  the same  class.
 
 
-"Paste and match style"
+In some cases it might actually not be desired to maintain the origin links between source and destination of copy-paste actions. 
+The system could support these situations by providing a special "Paste and Detach" action which severs the copy from its original (similar to "Past and Match Style").
+The example also assumes that when a user edits a formula she always intends to edit the whole class of clones. 
+However, the system could allow the user to chose to edit only this copy, or all copies at once (similar to changing "Recurring events" in calendar applications).
+
+<!-- 
+What the default behavior of editing and copying should be, remains a question for further research.
+-->
+
 
 # Semantics of Copy-Paste Tracking
 
 The previous section introduced copy-paste tracking from the perspective of the user. 
 Here we discuss how copy-paste tracking could be implemented.
 
-A spreadsheet is a rectangular grid of cells where each cell is identified by its *address*, which are pairs $(column, row)$ consisting of zero-based column and row coordinates.
+A spreadsheet is a rectangular grid of cells where each cell is identified by its *address*, which are pairs $An$ consisting of a column letter $A$ and a row index $n$.
 User actions always operate on one of more of these addresses.
-The origin relation between cells is then modeled as a binary relation between such address. For instance, the relation $Org = \{\langle ( 2,2),( 2,0)\rangle,\langle ( 2,1),( 2,0)\rangle\}$ captures the origin relation visualized in Figure 1 (2) [^2]. 
-In this case, the relation states that the formulas in cell $( 2,2)$ and cell $( 2, 1)$ are copied from cell $(2,0)$.
+The origin relation between cells is then modeled as a binary relation between such addresses. For instance, the relation 
+$Org = \{\langle D3, D2\rangle,\langle D4, D2\rangle\}$ captures the origin relation visualized in Figure 1 (2). 
+In this case, the relation states that the formulas in cell $D3$ and cell $D4$ are copied from cell $D2$.
+
+Without loss of generality we assume users only use relative cell referencing in formulas. That is, a cell reference consists of relative row and column offsets starting from the current cell [@Sestoft].
+For instance, the reference to `B2` in Fig. 1 (1) is a relative cell reference, is represented as `C-2R0` ("two columns left, same row").
+Relative cell referencing allows formulas to be moved around across the grid without having to adjust explicit column names or row indices.
 
 
 Interacting with the spreadsheet not only updates the sheet itself, but also maintains the origin relation. We describe the effect of the most relevant edit operations on a cell $c$:
 
-- Copying cell $c$ to $c'$: The contents of $c$ is copied to $c'$. 
-If the contents is a formula the origin relation needs to be updated as well.
-First, if $c'$ has an existing origin, the corresponding pair is removed from the relation.
-Then the relation is extended based on the current copy operation: if $c$ has an origin $c''$, add  $\langle c', c''\rangle$, else add $\langle c', c\rangle$.
-The check for the origin of $c$ ensures that the origin relation is always transitively closed.
 
 - Entering a formula: 
 If $c$ does not  participate in any origin relation, it is is simply updated with the new formula. 
 Otherwise, $c$ has a single origin, say $c'$, and the cells that need to be updated are $\{ c, c'\} \cup \{ c'' \;|\; \langle c'', c'\rangle \in Org \}$.
 In other words, both $c$ itself, the source $c'$ it was copied from , and all other copies $c''$ originating in $c'$ are updated.
 
-- Entering data: the sheet is updated with the new data. All pairs containing $c$, either as source or target, are removed from the origin relation.
+- Copying cell $c$ to $c'$: The contents of $c$ is copied to $c'$. 
+If the contents is a formula the origin relation needs to be updated as well.
+First, if $c'$ has an existing origin, the corresponding pair is removed from the relation. **TODO: alternastive : update class of existing origin**
+Then the relation is extended based on the current copy operation: if $c$ has an origin $c''$, add  $\langle c', c''\rangle$, else add $\langle c', c\rangle$.
+The check for the origin of $c$ ensures that the origin relation is always transitively closed.
+
+- Entering data: cell $c$ is updated with the new data. All pairs containing $c$, either as source or target, are removed from the origin relation.
 
 - Inserting/removing a row or column: after updating the sheet, the origin relation is adjusted so that cell addresses refer to their new locations. 
 For instance, when inserting a row  at position $i$, the row components of all the cell addresses on rows $\geq i$ in the origin relation needs to be shifted one down.
