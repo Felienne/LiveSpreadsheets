@@ -41,7 +41,7 @@ E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste
   -->
  
 
-Spreadsheet systems can easily be considered the most successful form of programming. Winston [@Wins2001] estimates that 90% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modelling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko[@Pank2006] estimates that 95% of U.S. firms, and 80% in Europe, use spreadsheets in some form for financial reporting.
+Spreadsheet systems can easily be considered the most successful form of programming. Winston [@Wins2001] estimates that 90% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modelling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko [@Pank2006] estimates that 95% of U.S. firms, and 80% in Europe, use spreadsheets in some form for financial reporting.
 
 <!--
 Spreadsheets are formally defined as a collection of worksheets, which in turn can contain cells. These cells can contain values, like numbers or text, or formulas, with calculations and cell references. In addition to these basic operations, many spreadsheet systems also allow users to create charts, graphs and pivot tables. When a user enters or updates a formula, the result is immediately shown to the user. Also, all cells depending on the changed formula are updated immediately. 
@@ -68,25 +68,16 @@ This copy-pasting as in the stories above is not always done by mistake. Rather,
 
 <!-- should emphasize the copying here... --->
 
-Existing research has focused on  improving spreadsheets in this direction. An example of this is the work of Engels _et al._ , who have developed a system called ClassSheets [@Enge2005] with which the structure of a spreadsheet can be described separately. The actual spreadsheet can then be guaranteed to conform to the meta description. Another direction is enriching spreadsheets with user-defined functions (UDFs) [@Jone2003]. In this case, spreadsheets users can factor out common computations into separate cells, and refer to them from elsewhere in the spreadsheet. <!-- TODO: MDSheet -->
+Existing research improving spreadsheets has focused on extending spreadsheets with abstraction mechanisms. An example of this is the work of Engels _et al._ , who have developed a system called ClassSheets [@Enge2005] with which the structure of a spreadsheet can be described separately. The actual spreadsheet can then be guaranteed to conform to the meta description. Another direction is enriching spreadsheets with user-defined functions (UDFs) [@Jone2003]. In this case, spreadsheets users can factor out common computations into separate cells, and refer to them from elsewhere in the spreadsheet. <!-- TODO: MDSheet -->
 
-Although these features improve the reliability of spreadsheet use, they have one important drawback, namely, that they break the "direct manipulation" aspect of spreadsheets. In a sense, separate meta models, or user defined abstractions, create distance between the actual user's artifact (data + formulas), and its behavior. Instead of just looking at the cells, the user now has to inspect at least two places: the cells containing the data and the the separate definitions of the abstractions (meta model and/or user defined functions). 
+Although these features improve the reliability of spreadsheet use, they have one important drawback, namely, that they break the "direct manipulation" aspect of spreadsheets. In a sense, separate meta models, or user defined abstractions, create distance between the actual user's artifact (data + formulas), and its computational behavior. Instead of just looking at the cells, the user now has to inspect at least two places: the cells containing the data and the separate definitions of the abstractions (meta model or user defined functions). 
 
-In this paper we propose XanaSheet: an alternative method to add abstraction, without diminishing the directness. In XanaSheet, we use _origin tracking techniques_  to maintain a live connection between source and destination of copy-paste actions. Whenever a copied formula is edited, the modifications are transformed and replayed on the original and all other copies. 
+In this paper we propose XanaSheet, a spreadsheet system that features an alternative method to manage abstraction, without diminishing directness. XanaSheet employs _origin tracking techniques_  to maintain a live connection between source and destination of copy-paste actions. Whenever a copied formula is edited, the modifications are transformed and replayed on the original and all other copies. 
 Instead of introducing another level of indirection using abstraction, XanaSheet allows users to edit classes of formulas, all at once. 
 In a sense, the abstraction, or user defined function, is there, but it never becomes explicit. By retaining ease of use, this technique has the potential to eliminate a large class of copy-paste errors, without compromising the direct manipulation aspect that make spreadsheets so attractive.
 
-<!--
-Without making the abstractions "concrete" as it were, we see the ranges for formulas as "materialization" of "platonic" (?) abstractions.
-The way to do this is tracking copying relations (origin tracking).
-Whenever a copy of a formula is edited, the original and all other copies are updated as well.
-As a result, we conjecture, it is possible to have our cake and eat it too, and fix spreadsheets without breaking them.
-
--->
-
 
 # Copy-Paste Tracking in Action
-
 
 ![*Maintaining consistency among clones of formulas through copy-paste tracking*](images/grades.png)
 
@@ -96,7 +87,7 @@ In the second step, the formula in cell D2 is copied to D3 and D4.
 D3 and D4 are clones of D2, and this relation is maintained by the system as an origin relation (visualized using the arrow). 
 In the third step, the clone in D4 is modified to apply rounding to the computed average. 
 Unlike in normal spreadsheets, however, this is not the end of the story
-and the system will reconcile the  original formula of D2 and the other clone in D3 with the changes in D4. 
+and XanaSheet will reconcile the  original formula of D2 and the other clone in D3 with the changes in D4. 
 
 A way to understand what is happening here, is to see spreadsheet formulas as materialized or unfolded abstractions.
 The abstraction in Fig. 1  is function `average(x,y)` for computing the average of two grades. 
@@ -116,8 +107,9 @@ What the default behavior of editing and copying should be, remains a question f
 
 # Semantics of Copy-Paste Tracking
 
-The previous section introduced copy-paste tracking from the perspective of the user. We are currently working to implement this method in a tool called XanaSheet. In this section we describe our considerations regarding the implementation. We implemented an executable semantics of copy-paste tracking for simulating interactive editing sessions with a spreadsheet. The code can be found online here: 
+The previous section introduced copy-paste tracking from the perspective of the user. In this section we describe our considerations regarding the implementation. We have implemented an executable semantics of copy-paste tracking for simulating interactive editing sessions with a spreadsheet. The code can be found online here: 
 [https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet](https://github.com/Felienne/LiveSpreadsheets/tree/master/XanaSheet).
+We are currently working on an interactive prototype of XanaSheet. 
 
 A spreadsheet is a rectangular grid of cells where each cell is identified by its *address*, which are pairs $An$ consisting of a column letter $A$ and a row index $n$.
 User actions always operate on one of more of these addresses.
@@ -197,9 +189,7 @@ But unlike in the case of transclusion, the relation is bidirectional: changes t
 *Clone tracking* in software: Godfrey and Tu [@Godf2002] proposed a method called _origin analysis_ which is a related to both clone detection and the above described origin tracking, but aims at deciding if a program entity was newly introduced or whether it if it should more accurately be viewed as a renamed, moved, or otherwise changed version of an previously existing entity. This laid the ground for a tool called _CloneTracker_ that "can automatically track clones as the code evolves, notify developers of modifications to clone
 regions, and support simultaneous editing of clone regions." [@Dual2007].
 
-*Prototype-based inheritance*: Lieberman introduced prototypes to implement shared behavior in object-oriented programming. In proto-type-based languages, objects are created by cloning and existing object. 
-The cloned object then inherits features (methods, slots) from its prototype. 
-Prototype-based inheritance contributed to the direct manipulation model of interaction [@Malo95]. The parent relation between objects is similar to our origin relation. However, we are not aware of any related work using this relation to propagate changes to clones back to their parents. 
+*Prototype-based inheritance*: Lieberman introduced prototypes to implement shared behavior in object-oriented programming [@LiebermanProto]. In prototype-based languages, objects are created by cloning and existing object. The cloned object then inherits features (methods, slots) from its prototype. The parent relation between objects is similar to our origin relation. However, we are not aware of any related work using this relation to propagate changes to clones back to their parents. 
 
 *Bidirectional transformation*: one way to look at copy-paste tracking is to see copies as views on the original formula similar to views in database systems. In particular, the copies are *updateable* views [@bancilhon1981update]. Different manifestations of the view update problem have received considerable attention recently in the context of *lenses* [@Lenses]  and bidirectional transformation [@BX]. In the context of user interfaces these concepts were pioneered by Meertens under the header of "constraint maintenance" [@Meertens]. In a certain sense, copy-paste tracking supports a very basic class of constraint maintenance where clones are simply synchronized to be equal.
 
