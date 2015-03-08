@@ -9,9 +9,12 @@ author:
     affiliation: Centrum Wiskunde & Informatica
     email: storm@cwi.nl
 abstract: |
-  TBD
-  TBD
-  TBD
+  Spreadsheets are the most popular live programming environments, but they are also notoriously fault-prone.
+  One reason for this is that users actively rely on copy-paste to  make up for the lack of abstraction mechanisms.
+  Adding such mechanisms, however, introduces indirection and  cognitive distance.
+  Copy-paste tracking allows users to directly edit copy-pasted formulas, but instead of changing only this single instance, the changes will be propagated to all formulas copied from the same source. 
+  As a result, spreadsheet users may enjoy the benefits of abstraction without its drawbacks.
+  
 fontsize: 11pt
 geometry: margin=2cm
 fontfamily: libertine
@@ -42,7 +45,9 @@ E Pluribus Unum: Direct Manipulation of Implicit Abstractions through Copy-Paste
 
 Spreadsheet systems can easily be considered the most successful form of programming. Winston [@Wins2001] estimates that 90% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modelling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko[@Pank2006] estimates that 95% of U.S. firms, and 80% in Europe, use spreadsheets in some form for financial reporting.
 
+<!--
 Spreadsheets are formally defined as a collection of worksheets, which in turn can contain cells. These cells can contain values, like numbers or text, or formulas, with calculations and cell references. In addition to these basic operations, many spreadsheet systems also allow users to create charts, graphs and pivot tables. When a user enters or updates a formula, the result is immediately shown to the user. Also, all cells depending on the changed formula are updated immediately. 
+-->
 
 Researchers have  argued that the _liveness_ characteristics of spreadsheets have contributed to the widespread success of spreadsheets [@thesisFelienne] and we know from interviews with users that liveness is important to them. They often start building a spreadsheet with the end goal in mind, and manipulate the formulas until they obtain the result they want.
 
@@ -220,29 +225,34 @@ Prototype-based inheritance contributed to the direct manipulation model of inte
 
 # Conclusion
 
-Future work
+Spreadsheet systems are the most popular live programming environments.
+They adhere to the powerful direct manipulation style of simultaneously editing data and code.
+Nevertheless, spreadsheets are known to be extremely fault-prone, mainly because users have to  use copy-paste instead of user defined abstractions.
+Existing research has tried to improve spreadsheets by introducing abstractions such as meta models or user defined functions, but this compromises the direct manipulation aspect that makes spreadsheets so attractive in the first place.
 
-Empirical evaluation which kind of copy is most used (?)
+In this paper we proposed copy-paste tracking as way to both have our cake and eat it too. 
+Instead of introducing another level of indirection, copy-paste tracking supports editing classes of formulas originating at the same source, all at once. 
+As a result, we get the benefits of abstraction (reuse, sharing, "single-point-of-change"), without the incurring the burden of cognitive distance. 
 
-User study?
+*Outlook* Duplication of knowledge is ubiquitous is computing.
+Copy-paste tracking can generalized to a broader scope by seeing it as an example of abstractions that are presented to the user in a materialized, expanded, unrolled, referenced, or instantiated state.
+The relation between such views and the original is often many-to-one and the views are often read only. 
+Copy-paste tracking could provide a model to make such user views of abstractions editable. 
+Thus, copy-paste tracking in its most general form improves direct manipulation in interactive systems and allows users to maintain abstractions through their multiple concretizations.
+We conclude by providing a tentative list of examples where similar ideas could be applied: 
 
-Inferring origin relations to "migrate" (although: there's no one formula that's special or singled out).
 
-Copy-paste tracking can generalized to a broader scope by seeing it as an example of abstractions that are materialized or referenced in multiple places in a runnning system.
+"Duplication" (many) | "Source" (one)
+------------------+---------------
+Reference | Declaration
+Stack frame | Procedure call
+Inlining | Procedure 
+Text output | Template
+Object | Class
+Styled element | Style sheet
+View | Database table
+Unrolling | Loop
 
-Duplication is ubiquitous is computation....
-
-Bidirectional transformation.
-
-We give a tentative list of example which would merit further research. 
-
-- Manipulating stack frames in a debugger view to change procedure definitions.
-
-- Use sites of variables, procedures, classes, etc. vs their declarations
-
-- Modifying style attributes of GUI elements which originate from a reusable abstraction.
-
-- Editing the output of template-based code generator to change both the template and or the input to the template.
 
 
 
