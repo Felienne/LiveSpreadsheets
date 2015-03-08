@@ -207,7 +207,7 @@ As a result, we get the benefits of abstraction (reuse, sharing, "single-point-o
 *Outlook* Duplication of knowledge is ubiquitous is computing. Copy-paste tracking can generalized to a broader scope by seeing it as an example of abstractions that are presented to the user in a materialized, expanded, unrolled, referenced, or instantiated state.
 The relation between such views and the original is often many-to-one and the views are often read only. 
 Copy-paste tracking could provide a model to make such user views of abstractions editable. 
-Thus, copy-paste tracking in its most general form improves direct manipulation in interactive systems and allows users to maintain abstractions through their multiple concretizations.
+Thus, copy-paste tracking in its most general form supports direct manipulation in interactive systems and allows users to maintain abstractions through their multiple concretizations.
 We conclude by providing a tentative list of examples where similar ideas could be applied: 
 
 
