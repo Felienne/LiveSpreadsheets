@@ -219,7 +219,7 @@ Inlining | Procedure
 Text output | Template
 Object | Class
 Styled element | Style sheet
-View | Database table
+Denormalized view | Normalized database
 Unrolling | Loop
 
 
