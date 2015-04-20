@@ -1,5 +1,7 @@
 module AST
 
+import String;
+
 data Sheet 
   = sheet(list[TableDef] defs)
   ;
@@ -76,4 +78,17 @@ data Coord
   = relative(int n)
   | absolute(int n)
   ; 
+    
+str colName(int columnNumber) {
+  dividend = columnNumber;
+  columnName = "";
+  modulo = 0;
+  while (dividend > 0) {
+    modulo = (dividend - 1) % 26;
+    columnName = stringChar(65 + modulo) + columnName;
+    dividend = (dividend - modulo) / 26;
+  } 
+
+  return columnName;
+}
     

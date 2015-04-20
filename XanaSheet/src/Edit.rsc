@@ -6,18 +6,17 @@ import List;
 import IO;
 import String;
 
-str colName(int columnNumber) {
-  dividend = columnNumber;
-  columnName = "";
-  modulo = 0;
-  while (dividend > 0) {
-    modulo = (dividend - 1) % 26;
-    columnName = stringChar(65 + modulo) + columnName;
-    dividend = (dividend - modulo) / 26;
-  } 
+/*
 
-  return columnName;
-}
+Order:
+- parse
+- implode
+- align
+- edit
+- eval
+- format (also normalizes cnames and rnames).
+
+*/
 
 list[Cell] adjustRefs(list[Cell] cells, int rowOffset, int colOffset) {
    Cell adjust(Cell c, int colIdx) {
