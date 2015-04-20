@@ -53,7 +53,7 @@ Sheet grades() = sheet(3, 3, [
   [val(9.0), val(7.0), empty()],
   [val(5.0), val(3.5), empty()]
 ]);
-
+ 
 
 Script buildGrades1() = [
    insertRow(0), insertRow(0), insertRow(0),
@@ -128,7 +128,7 @@ Result eval(putData(Address a, real v), Sheet s, Origin org) {
 }
 
 Origin removeLinks(Address a, Origin org) 
-  = { <f, t> | <f, t> <- org, f != a};
+  = { <f, t> | <f, t> <- org, f != a, t != a };
 
 Result eval(putFormula(Address a, Expr e), Sheet s, Origin org) {
   s = putCell(a, expr(e), s);
@@ -142,10 +142,10 @@ Result eval(putFormula(Address a, Expr e), Sheet s, Origin org) {
 }
 
 Result copyCell(Address x, Address y, Sheet s, Origin org) {
-  Cell toBeCopied = getCell(x, s);
-  s = putCell(y, toBeCopied, s);
-  org = removeLinks(y, org);
-  if (toBeCopied is expr) {
+  Cell toCopy = getCell(x, s);
+  s = putCell(y, toCopy, s);
+  org = removeLinks(y, org); // should we rebindg and links to y to x or org of x?
+  if (toCopy is expr) {
     if (<x, Address src> <- org) {
       // maintain farthest origin 
       org += {<y, src>};
