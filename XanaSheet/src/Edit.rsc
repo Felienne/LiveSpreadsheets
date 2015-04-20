@@ -4,8 +4,40 @@ import AST;
 import List;
 
 import IO;
+import String;
+
+str colName(int columnNumber) {
+  dividend = columnNumber;
+  columnName = "";
+  modulo = 0;
+  while (dividend > 0) {
+    modulo = (dividend - 1) % 26;
+    columnName = stringChar(65 + modulo) + columnName;
+    dividend = (dividend - modulo) / 26;
+  } 
+
+  return columnName;
+}
+
+list[Cell] adjustRefs(list[Cell] cells, int rowOffset, int colOffset) {
+   Cell adjust(Cell c, int colIdx) {
+     return visit (c) {
+       case relCell(str col, int row) => relCell(colName(colIdx + colOffset), row + rowOffset)
+       case absRow(str col, int row) => absRow(colName(colIdx + colOffset), row)
+       case absCol(str col, int row) => absCol(col, row + rowOffset)
+     }
+  }
+  
+  i = 0;
+  cells = for (c <- cells) {
+     append adjust(c, i);
+     i += 1;
+  }
+  return cells; 
+} 
 
 // assumes aligned
+// align basically fills adds columns to the right to match the longest row
 Table edit(Table tbl) {
   mods = [];
 
@@ -19,47 +51,58 @@ Table edit(Table tbl) {
       println("Add before: <ns[i]>");
       tbl.header.names[i + offset] = ns[i].cname; 
       tbl.header.names = insertAt(tbl.header.names, i + offset, CName::empty());
-      mods += [i];
+      mods += [i + 1];
       offset += 1;
     }
     if (ns[i] is addAfter) {
       tbl.header.names[i + offset] = ns[i].cname; 
       tbl.header.names = insertAt(tbl.header.names, i + offset + 1, CName::empty());
-      mods += [i + 1];
+      mods += [i + 1 + 1];
       offset += 1;
     }
     if (ns[i] is delete) {
       tbl.header.names = remove(tbl.header.names, i + offset);
-      mods += [-i];
+      mods += [-i - 1];
       offset -= 1;
     }
   } 
   
   absDiff = ( 0 | it + (x > 0 ? 1 : -1) | x <- mods );
   
+  println("MODS = <mods>");
+  rowOffset = 0;
   tbl.rows = for (r <- tbl.rows) {
      offset = 0;
      for (i <- mods) { 
        if (i > 0) {
-         r.cells = insertAt(r.cells, i + offset, Cell::empty());
+         r.cells = insertAt(r.cells, i + offset - 1, Cell::empty());
        }
        else {
-         r.cells = remove(r.cells, i + offset);
+         // the - 1 seems wrong...
+         r.cells = remove(r.cells, i + offset - 1);
        }
-       offset += i > 0 ? 1 : -1;
+       dir = i > 0 ? 1 : -1;
+       r.cells = adjustRefs(r.cells, rowOffset, i + offset - 1);
+       offset += dir;
      }
      if (r.name is addBefore) {
        r.name = r.name.rname;
        append row(empty(), [ Cell::empty() | k <- [0..oldWidth + absDiff] ]);
-       append r;
+       rowOffset += 1;
+       r.cells = adjustRefs(r.cells, rowOffset, offset);
+       append r; 
+       
      }
      else if (r.name is addAfter) {
        r.name = r.name.rname;
        append r;
        append row(empty(), [ Cell::empty() | k <- [0..oldWidth + absDiff] ]);
+       rowOffset += 1;
      }
      else if (!(r.name is delete)) {
+       r.cells = adjustRefs(r.cells, rowOffset, offset);
        append r;
+       rowOffset -= 1;
      }
   } 
   
@@ -87,6 +130,18 @@ Table allTogether()
       row(addBefore(rname(1)), [ symbol("foo"), symbol("bar") ]),      
       row(addAfter(rname(2)), [ symbol("baz"), symbol("bla") ]),      
       row(delete(rname(3)), [ symbol("baz"), symbol("bla") ])      
+     ]);
+
+Table addRowBeforeFormulaTable() 
+  = table(header([cname("A"), cname("B")]), 
+     [
+      row(addBefore(rname(1)), [ symbol("foo"), formula(relCell("A", 1)) ])      
+     ]);
+
+Table addRowAndColumnBeforeFormulaTable() 
+  = table(header([addBefore(cname("A")), cname("B")]), 
+     [
+      row(addBefore(rname(1)), [ symbol("foo"), formula(relCell("A", 1)) ])      
      ]);
 
 
