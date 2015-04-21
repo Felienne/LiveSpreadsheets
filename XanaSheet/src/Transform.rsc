@@ -28,7 +28,7 @@ XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
       if (td is view) {
         tname = "<td.name>";
         if (tname in env) {
-          src = trim(ppTable(eval(env[tname]), td.table@\loc.begin.column + 2));
+          src = trim(ppTable(eval(env[tname]), td.table@\loc.begin.column));
           td.table = parse(#XanaSyntax::Table, src);
           insert td;
         }
@@ -36,14 +36,14 @@ XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
       else if (td is emptyView) {
         tname = "<td.name>";
         if (tname in env) {
-          src = trim(ppTable(eval(env["<td.name>"]), td@\loc.end.column + 2));
+          src = trim(ppTable(eval(env["<td.name>"]), td@\loc.end.column));
           tbl = parse(#XanaSyntax::Table, src);
           id = td.name;
           insert (TableDef)`view <Id id> = <Table tbl>.`;
         }
       }
       else {
-        src = trim(ppTable(env["<td.name>"], td.table@\loc.begin.column + 2));
+        src = trim(ppTable(env["<td.name>"], td.table@\loc.begin.column));
         td.table = parse(#XanaSyntax::Table, src);
         insert td;
       }

@@ -94,16 +94,16 @@ list[list[real]] evalExpr(Expr::float(real f), Table t) = [[f]];
 
   
 list[list[real]] evalExpr(mul(l, r), Table t)
-  = [[evalExpr(l, t)[0][0] + evalExpr(r, t)[0][0]]];
+  = [[evalExpr(l, t)[0][0] * evalExpr(r, t)[0][0]]];
   
 list[list[real]] evalExpr(div(l, r), Table t)
-  = [[evalExpr(l, t)[0][0] + evalExpr(r, t)[0][0]]];
+  = [[evalExpr(l, t)[0][0] / evalExpr(r, t)[0][0]]];
 
 list[list[real]] evalExpr(add(l, r), Table t)
   = [[evalExpr(l, t)[0][0] + evalExpr(r, t)[0][0]]];
   
 list[list[real]] evalExpr(sub(l, r), Table t)
-  = [[evalExpr(l, t)[0][0] + evalExpr(r, t)[0][0]]];
+  = [[evalExpr(l, t)[0][0] - evalExpr(r, t)[0][0]]];
 
 default list[list[real]] evalExpr(Expr _, Table t) = [[0.0]];
 

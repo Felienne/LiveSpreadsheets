@@ -18,27 +18,115 @@ Order:
 
 */
 
-list[Cell] adjustRefs(list[Cell] cells, int rowOffset, int colOffset) {
-   return cells;
-   Cell adjust(Cell c, int colIdx) {
-     return visit (c) {
-       case relCell(str col, int row) => relCell(colName(colIdx + colOffset), row + rowOffset)
-       case absRow(str col, int row) => absRow(colName(colIdx + colOffset), row)
-       case absCol(str col, int row) => absCol(col, row + rowOffset)
-     }
-  }
-  
+//list[Cell] adjustRefs(list[Cell] cells, int rowOffset, int colOffset, list[CName] oldNames) {
+//   Cell adjust(Cell c, int colIdx) {
+//     return visit (c) {
+//       case relCell(str col, int row): {
+//          ci = indexOf(oldNames, cname(col)) + 1;
+//          if (ci > colOffset) {
+//            col = colName(ci + 1);
+//          }
+//          if (row > rowOffset) {
+//            row += 1;
+//          }
+//          insert relCell(col, row);
+//       }
+//       case absRow(str col, int row): {
+//          ci = indexOf(oldNames, cname(col)) + 1;
+//          if (ci > colOffset) {
+//            col = colName(ci + 1);
+//          }
+//          insert absRow(col, row);
+//       }
+//       case absCol(str col, int row): {
+//          if (row > rowOffset) {
+//            row += 1;
+//          }
+//          insert absCol(col, row);
+//       }
+//     }
+//  }
+//  
+//  i = 0;
+//  cells = for (c <- cells) {
+//     append adjust(c, i + 1);
+//     i += 1;
+//  }
+//  iprintln(cells);
+//  return cells; 
+//} 
+
+int columnIndex(str col, list[CName] oldNames) {
   i = 0;
-  cells = for (c <- cells) {
-     append adjust(c, i);
-     i += 1;
+  for (cn <- oldNames) {
+    if (/cname(col) := cn) { // deep match to deal with +/- etc.
+      return i;
+    }
+    i += 1;
   }
-  return cells; 
-} 
+  return -1 ;
+}
+
+list[Cell] adjustColumns(list[Cell] cells, int from, int dir, list[CName] oldNames) {
+  println("Adjusting: from = <from>, dir = <dir>");
+  for (i <- [0..size(cells)]) {
+    cells[i] = visit (cells[i]) {
+      case relCell(str col, int row): {
+        ci = columnIndex(col, oldNames);
+        println("ci = <ci>");
+        println("col = <col>");
+        if (ci >= from) { 
+          insert relCell(colName(ci + dir + 1), row);
+        }
+      }
+      case absRow(str col, int row): {
+        ci = columnIndex(col, oldNames);
+        if (ci >= from) {
+          insert absRow(colName(ci + dir + 1), row);
+        }
+      }
+    } 
+  }
+  return cells;
+}
+
+Table edit(Table tbl) {
+  // only support 1 edit at a time
+  
+  ns = tbl.header.names;
+  for (i <- [0..size(ns)]) {
+    if (ns[i] is addBefore) {
+      tbl.header.names = insertAt(tbl.header.names, i, CName::empty());
+      tbl.rows = for (r <- tbl.rows) {
+        r.cells = adjustColumns(insertAt(r.cells, i, Cell::empty()), i, 1, ns);
+        append r;
+      }
+      return tbl;
+    }
+    if (ns[i] is addAfter) {
+      tbl.header.names = insertAt(tbl.header.names, i + 1, CName::empty());
+      tbl.rows = for (r <- tbl.rows) {
+        r.cells = adjustColumns(insertAt(r.cells, i + 1, Cell::empty()), i + 1, 1, ns);
+        append r;
+      }
+      return tbl;
+    }
+    if (ns[i] is delete) {
+      tbl.header.names = remove(tbl.header.names, i);
+      tbl.rows = for (r <- tbl.rows) {
+        r.cells = adjustColumns(remove(r.cells, i), i, -1, ns);
+        append r;
+      }
+      return tbl;
+    }
+  } 
+  
+  return tbl;
+}
 
 // assumes aligned
 // align basically fills adds columns to the right to match the longest row
-Table edit(Table tbl) {
+Table edit___advanced(Table tbl) {
   mods = [];
 
   oldWidth = size(tbl.header.names);

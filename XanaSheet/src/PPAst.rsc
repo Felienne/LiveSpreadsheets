@@ -44,7 +44,7 @@ str ppTable(Table t, int indent) {
 }
 
 str ppCName(int col) = "<colName(col + 1)>";
-str ppRName(int idx) = "<idx>:";
+str ppRName(int idx) = "<idx + 1>:";
 
 str ppCell(Cell::integer(n)) = "<n>";
 str ppCell(Cell::float(n)) = "<n>";
