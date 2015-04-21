@@ -46,22 +46,26 @@ str ppTable(Table t, int indent) {
 str ppCName(int col) = "<colName(col + 1)>";
 str ppRName(int idx) = "<idx>:";
 
-str ppCell(integer(n)) = "<n>";
-str ppCell(string(s)) = s;
+str ppCell(Cell::integer(n)) = "<n>";
+str ppCell(Cell::float(n)) = "<n>";
+str ppCell(Cell::string(s)) = s;
 str ppCell(symbol(s)) = s;
 str ppCell(Cell::empty()) = "";
-str ppCell(formula(e)) = ppExpr(e);
+str ppCell(formula(e)) = "= <ppExpr(e)>";
 str ppCell(openRect(c)) = "[ <ppCell(c)>";
 str ppCell(closeRect(c)) = "<ppCell(c)> ]";
 str ppCell(rect(c)) = "[ <ppCell(c)> ]";
 
-str ppExpr(p:relCell(str col, int row)) = "<col><row>";
-str ppExpr(p:absRow(str col, int row)) = "<col>$<row>";
-str ppExpr(p:absCol(str col, int row)) = "$<col><row>";
-str ppExpr(p:absCell(str col, int row)) = "$<col>$<row>";
-str ppExpr(p:integer(int n)) = "<n>";
-str ppExpr(p:string(str s)) = s;
-str ppExpr(p:float(real f)) = "<f>";
+str ppRef(p:relCell(str col, int row)) = "<col><row>";
+str ppRef(p:absRow(str col, int row)) = "<col>$<row>";
+str ppRef(p:absCol(str col, int row)) = "$<col><row>";
+str ppRef(p:absCell(str col, int row)) = "$<col>$<row>";
+
+str ppExpr(p:ref(Ref r)) = ppRef(r);
+str ppExpr(p:range(Ref f, Ref t)) = "<ppRef(f)>:<ppRef(t)>";
+str ppExpr(p:Expr::integer(int n)) = "<n>";
+str ppExpr(p:Expr::string(str s)) = s;
+str ppExpr(p:Expr::float(real f)) = "<f>";
 str ppExpr(p:\true()) = "true";
 str ppExpr(p:\false()) = "false";
 str ppExpr(p:call(str func, list[Expr] args)) = "<func>(<intercalate(", ", [ ppExpr(a) | a <- args ])>)";

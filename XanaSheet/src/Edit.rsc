@@ -19,6 +19,7 @@ Order:
 */
 
 list[Cell] adjustRefs(list[Cell] cells, int rowOffset, int colOffset) {
+   return cells;
    Cell adjust(Cell c, int colIdx) {
      return visit (c) {
        case relCell(str col, int row) => relCell(colName(colIdx + colOffset), row + rowOffset)
@@ -134,13 +135,13 @@ Table allTogether()
 Table addRowBeforeFormulaTable() 
   = table(header([cname("A"), cname("B")]), 
      [
-      row(addBefore(rname(1)), [ symbol("foo"), formula(relCell("A", 1)) ])      
+      row(addBefore(rname(1)), [ symbol("foo"), formula(ref(relCell("A", 1))) ])      
      ]);
 
 Table addRowAndColumnBeforeFormulaTable() 
   = table(header([addBefore(cname("A")), cname("B")]), 
      [
-      row(addBefore(rname(1)), [ symbol("foo"), formula(add(Expr::integer(3), relCell("A", 1))) ])      
+      row(addBefore(rname(1)), [ Cell::integer(23), formula(add(Expr::integer(3), ref(relCell("A", 1)))) ])      
      ]);
 
 

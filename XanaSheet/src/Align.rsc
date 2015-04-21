@@ -13,7 +13,7 @@ Table align(Table t) {
   
   i = 0;
   t.rows = for (r <- t.rows) {
-    r.rname = rname(i);
+    r.name = rname(i);
     r.cells += [ Cell::empty() | _ <- [0..size(r.cells) - len] ];
     i += 1;
     append r;

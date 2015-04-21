@@ -79,6 +79,7 @@ layout RowLayout
 
 syntax Cell
   = @category="Constant" integer: Int
+  | @category="Constant" float: Float
   | @category="StringLiteral" string: String
   | @category="StringLiteral" symbol: Id
   | empty:
@@ -93,11 +94,16 @@ lexical UId
   = [A-Z]+ !>> [A-Z]
   ;
 
-syntax Expr
+syntax Ref
   = relCell: UId Int
   | absRow:  UId "$" Int
   | absCol:  "$" UId  Int
   | absCell: "$" UId "$" Int
+  ;
+
+syntax Expr
+  = ref: Ref ref
+  | range: Ref from ":" Ref to
   | integer: Int
   | string: String
   | float: Float
@@ -139,7 +145,7 @@ lexical Int
   ;
   
 lexical Float
-  = [0-9]* "." [0-9]+ !>> [0-9]
+  = [0-9]+ "." [0-9]* !>> [0-9]
   ;
 
 lexical Id

@@ -7,6 +7,9 @@ import Align;
 import Edit;
 import Eval;
 import PPAst;
+import String;
+import IO;
+
 
 XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
   env = ();
@@ -14,7 +17,8 @@ XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
     case XanaSyntax::TableDef td: {
       if (td is def) {
         tbl = implode(#AST::Table, td.table);
-        env["<td.name>"] = edit(align(tbl));
+        ast = edit(align(tbl));
+        env["<td.name>"] = ast;
       }
     }
   }
@@ -22,13 +26,26 @@ XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
   return visit (s) {
     case XanaSyntax::TableDef td: {
       if (td is view) {
-        td.table = parse(#XanaSyntax::Table, ppTable(eval(env["<td.name>"]), td.table@\loc.begin.column + 1));
-        insert td;
+        tname = "<td.name>";
+        if (tname in env) {
+          src = trim(ppTable(eval(env[tname]), td.table@\loc.begin.column + 2));
+          td.table = parse(#XanaSyntax::Table, src);
+          insert td;
+        }
       }
       else if (td is emptyView) {
-        tbl = parse(#XanaSyntax::Table, ppTable(eval(env["<td.name>"]), td.table@\loc.begin.column + 1));
-        id = td.name;
-        insert (TableDef)`view <Id id> = <Table tbl>.`;
+        tname = "<td.name>";
+        if (tname in env) {
+          src = trim(ppTable(eval(env["<td.name>"]), td@\loc.end.column + 2));
+          tbl = parse(#XanaSyntax::Table, src);
+          id = td.name;
+          insert (TableDef)`view <Id id> = <Table tbl>.`;
+        }
+      }
+      else {
+        src = trim(ppTable(env["<td.name>"], td.table@\loc.begin.column + 2));
+        td.table = parse(#XanaSyntax::Table, src);
+        insert td;
       }
     }
   }

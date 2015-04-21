@@ -43,6 +43,7 @@ data Cell
   = integer(int n)
   | string(str s)
   | symbol(str s)
+  | float(real r)
   | empty()
   | formula(Expr expr)
   | openRect(Cell cell)
@@ -50,11 +51,16 @@ data Cell
   | rect(Cell cell)
   ;
 
-data Expr
+data Ref
   = relCell(str col, int row)
   | absRow(str col, int row)
   | absCol(str col, int row)
   | absCell(str col, int row)
+  ;
+
+data Expr
+  = ref(Ref ref)
+  | range(Ref from, Ref to)
   | integer(int n)
   | string(str s)
   | float(real f)
