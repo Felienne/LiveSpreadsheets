@@ -7,7 +7,10 @@ data Sheet
   ;
   
 data TableDef
-  = def(str id, Table table);
+  = def(str id, Table table)
+  | view(str id, Table table)
+  | emptyView(str id)
+  ;
   
 data Table
   = table(Header header, list[Row] rows);

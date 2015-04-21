@@ -8,10 +8,14 @@ import IO;
 @doc{Makes sure all rows and header are of equal length}
 Table align(Table t) {
   len = longestRowSize(t);
-  t.header.names += [ CName::empty() | _ <- [0..size(t.header.names) - len] ];
+  hlen = size(t.header.names);
+  t.header.names += [ cname(colName(i)) | i <- [hlen..hlen + (hlen - len)] ];
   
+  i = 0;
   t.rows = for (r <- t.rows) {
+    r.rname = rname(i);
     r.cells += [ Cell::empty() | _ <- [0..size(r.cells) - len] ];
+    i += 1;
     append r;
   }
   

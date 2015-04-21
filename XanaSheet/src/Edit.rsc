@@ -140,7 +140,7 @@ Table addRowBeforeFormulaTable()
 Table addRowAndColumnBeforeFormulaTable() 
   = table(header([addBefore(cname("A")), cname("B")]), 
      [
-      row(addBefore(rname(1)), [ symbol("foo"), formula(relCell("A", 1)) ])      
+      row(addBefore(rname(1)), [ symbol("foo"), formula(add(Expr::integer(3), relCell("A", 1))) ])      
      ]);
 
 

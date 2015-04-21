@@ -28,7 +28,9 @@ start syntax Sheet
 
 
 syntax TableDef
-  = def: "table" Id "=" Table table "." 
+  = def: "table" Id name "=" Table table "." 
+  | view: "view" Id name "=" Table table "."
+  | emptyView: "view" Id name
   ;
 
 
