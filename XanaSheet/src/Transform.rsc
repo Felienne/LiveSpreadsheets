@@ -42,7 +42,7 @@ XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
           insert (TableDef)`view <Id id> = <Table tbl>.`;
         }
       }
-      else {
+      else if (td is def) {
         src = trim(ppTable(env["<td.name>"], td.table@\loc.begin.column));
         td.table = parse(#XanaSyntax::Table, src);
         insert td;

@@ -10,6 +10,13 @@ data TableDef
   = def(str id, Table table)
   | view(str id, Table table)
   | emptyView(str id)
+  | repl(list[REPLLine] lines)
+  ;
+  
+data REPLLine
+  = command(Expr cmd)
+  | empty()
+  | result(Expr cmd) // TODO: introduce Value and use in Cell/Expr/Result
   ;
   
 data Table
@@ -67,6 +74,7 @@ data Expr
   | \true()
   | \false()
   | call(str func, list[Expr] args)
+  | tableRef(str table, Ref ref)
   | not(Expr arg)
   | mul(Expr lhs, Expr rhs)
   | div(Expr lhs, Expr rhs)

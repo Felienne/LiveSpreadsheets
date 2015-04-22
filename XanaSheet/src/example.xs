@@ -1,28 +1,30 @@
 
+/*
+ This is a test.
+ */
       
-table test = #  A / B    / C
-             1:   | = B1 | 2 .      
+table test = 
+  #  A    / B / C
+  1: = B1 | 4 | 2 .      
   
-table grades =   #  A   / B        / C               / D          
-                 1: Lab | Exam     | Avg             | Grade      
-                 2: 7   | 7        | = (A2 + B2) / 2 | = round(C2)
-                 3: 10  | 10000000 | = D2            |            
-                 4: 10  | 10       | = B2            |            
-                 5: 10  | 10       | 8               |            
-                 6:     | 10       |                 |            
-                 7: 10  | 10       |                 |            
-                 8: 10  | 10       |                 |            
-                 9: 10  | 10       |                 |
-.
+view test = 
+  #  A  / B / C
+  1: 4. | 4 | 2.
+
+  
+table grades = 
+
+
+  #  A   / B    / C               / D          
+  1: Lab | Exam | Avg             | Grade      
+  2: 7   | 4    | = (A2 + B2) / 3 | = round(C2)
+  3: 3   | 6    | = (A3 + B3) / 2 | = round(C3)
+  4: 9   | 10   | = (A4 + B4) / 2 | = round(C4).
  
 view grades = 
-  #  A   / B        / C   / D    
-  1: Lab | Exam     | Avg | Grade
-  2: 7   | 7        | 7.  | 7.   
-  3: 10  | 10000000 | 7.  |      
-  4: 10  | 10       | 7.  |      
-  5: 10  | 10       | 8   |      
-  6:     | 10       |     |      
-  7: 10  | 10       |     |      
-  8: 10  | 10       |     |      
-  9: 10  | 10       |     |.        
+  #  A   / B    / C           / D    
+  1: Lab | Exam | Avg         | Grade
+  2: 7   | 4    | 3.666666667 | 4.   
+  3: 3   | 6    | 4.5         | 5.   
+  4: 9   | 10   | 9.5         | 10..        
+

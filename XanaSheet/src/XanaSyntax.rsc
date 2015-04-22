@@ -31,8 +31,14 @@ syntax TableDef
   = def: "table" Id name "=" Table table "." 
   | view: "view" Id name "=" Table table "."
   | emptyView: "view" Id name
+  | repl: "repl" REPLLine+
   ;
 
+syntax REPLLine
+  = command: ^ "\>" Expr "."
+  | empty: ^ "\>"
+  | @category="Comment" result: "=\>" Expr
+  ;
 
 syntax Table 
   = table: Header header TableLayout {Row TableLayout}+ rows
@@ -103,13 +109,14 @@ syntax Ref
 
 syntax Expr
   = ref: Ref ref
-  | range: Ref from ":" Ref to
+  | range: Ref from ":" Ref to // TODO: range should be in ref
   | integer: Int
   | string: String
   | float: Float
   | \true: "true"
   | \false: "false"
   | call: Id "(" {Expr ","}* ")"
+  | tableRef: Id "." Ref
   | bracket "(" Expr ")"
   > not: "!" Expr
   > left (
@@ -152,8 +159,16 @@ lexical Id
   = ([a-z A-Z 0-9 _] !<< [a-z A-Z][a-z A-Z 0-9 _]* !>> [a-z A-Z 0-9 _]) \ Keywords
   ;
 
+lexical Comment
+  = "/*" (![*] | [*] !>> [/])* "*/";
+
+syntax WhitespaceOrComment
+  = Whitespace
+  | @category="Comment" Comment
+  ;
+
 layout Layout
-  = Whitespace* !>> [\ \t\n\r]
+  = WhitespaceOrComment* !>> [\ \t\n\r] !>> "*/"
   ;
   
 lexical Whitespace 
