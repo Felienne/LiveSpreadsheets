@@ -11,6 +11,8 @@ data TableDef
   | view(str id, Table table)
   | emptyView(str id)
   | repl(list[REPLLine] lines)
+  | testSuccess(str ctx, Expr lhs, Expr rhs)
+  | testFailed(str ctx, Expr lhs, Expr rhs, Expr exp, Expr got)
   ;
   
 data REPLLine

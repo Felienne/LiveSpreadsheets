@@ -32,6 +32,8 @@ syntax TableDef
   | view: "view" Id name "=" Table table "."
   | emptyView: "view" Id name
   | repl: "repl" REPLLine+
+  | testSuccess: "test" Id ctx Expr lhs "==" Expr rhs
+  | testFailed: "test" Id ctx Expr lhs "==" Expr rhs "expected" Expr exp ", got" Expr got
   ;
 
 syntax REPLLine
