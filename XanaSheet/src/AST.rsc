@@ -10,11 +10,17 @@ data TableDef
   = def(str id, Table table)
   | view(str id, Table table)
   | emptyView(str id)
-  | repl(list[REPLLine] lines)
+  | repl(str ctx, Repl repl)
   | testSuccess(str ctx, Expr lhs, Expr rhs)
   | testFailed(str ctx, Expr lhs, Expr rhs, Expr exp, Expr got)
   ;
   
+  
+data Repl
+  = empty()
+  | command(Expr cmd)
+  | result(Repl hist, Expr result, Repl prompt)
+  ;
 data REPLLine
   = command(Expr cmd)
   | empty()

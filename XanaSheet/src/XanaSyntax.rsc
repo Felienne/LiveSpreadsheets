@@ -31,15 +31,16 @@ syntax TableDef
   = def: "table" Id name "=" Table table "." 
   | view: "view" Id name "=" Table table "."
   | emptyView: "view" Id name
-  | repl: "repl" REPLLine+
+  | repl: "repl" "for" Id ctx Repl repl
   | testSuccess: "test" Id ctx Expr lhs "==" Expr rhs
   | testFailed: "test" Id ctx Expr lhs "==" Expr rhs "expected" Expr exp ", got" Expr got
   ;
 
-syntax REPLLine
-  = command: ^ "\>" Expr "."
-  | empty: ^ "\>"
-  | @category="Comment" result: "=\>" Expr
+
+syntax Repl
+  = empty: ^ "\>"
+  | command: ^ "\>" Expr cmd "."
+  | right result: Repl hist "=\>" Expr result Repl prompt
   ;
 
 syntax Table 

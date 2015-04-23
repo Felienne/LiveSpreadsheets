@@ -23,6 +23,13 @@ table grades =
  
 test grades A2 + B2 == 13 
  
+repl for grades
+> A2 + B2.
+=> 13.
+> A2 * B2.
+=> 42.
+>   
+ 
 view grades = 
   #  A   / B    / C           / D    
   1: Lab | Exam | Avg         | Grade

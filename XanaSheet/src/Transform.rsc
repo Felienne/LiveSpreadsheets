@@ -47,6 +47,34 @@ XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
         td.table = parse(#XanaSyntax::Table, src);
         insert td;
       }
+      else if (td is repl) {
+        ctx = "<td.ctx>";
+        if (ctx in env) {
+          if (td.repl is command) {
+             v = evalExpr(implode(#AST::Expr, td.repl.cmd), env[ctx], env)[0][0];
+             ve = parse(#XanaSyntax::Expr, "<v>");
+             r = td.repl;
+             src = "<r>
+                   '=\> <ve>
+                   '\>";
+             td.repl = parse(#XanaSyntax::Repl, src);
+             insert td;
+          }
+          else if (td.repl is result) {
+            if (td.repl.prompt is command) {
+               v = evalExpr(implode(#AST::Expr, td.repl.prompt.cmd), env[ctx], env)[0][0];
+               ve = parse(#XanaSyntax::Expr, "<v>");
+               r = td.repl;
+               src = "<r>
+                   '=\> <ve>
+                   '\>";
+               td.repl = parse(#XanaSyntax::Repl, src);
+               insert td;
+            }
+          }
+        }
+      
+      }
       else if (td is testSuccess) {
         ctx = "<td.ctx>";
         if (ctx in env) {
@@ -58,7 +86,7 @@ XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
             lhs = td.lhs;
             rhs = td.rhs;
             Id id = parse(#XanaSyntax::Id, ctx);
-            insert (TableDef)`test <Id id> <Expr lhs> == <Expr rhs> expected <Expr v1e>, got <Expr v2e>`;
+            insert (TableDef)`test <Id id> <Expr lhs> == <Expr rhs> expected <Expr v2e>, got <Expr v1e>`;
           }
         }
       }
@@ -68,8 +96,8 @@ XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
           v1 = evalExpr(implode(#AST::Expr, td.lhs), env[ctx], env)[0][0];
           v2 = evalExpr(implode(#AST::Expr, td.rhs), env[ctx], env)[0][0];
           if (v1 != v2) {
-            td.exp = parse(#XanaSyntax::Expr, "<v1>");
-            td.got = parse(#XanaSyntax::Expr, "<v2>");
+            td.exp = parse(#XanaSyntax::Expr, "<v2>");
+            td.got = parse(#XanaSyntax::Expr, "<v1>");
             insert td;
           }
           else {
