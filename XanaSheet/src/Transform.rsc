@@ -13,17 +13,39 @@ import IO;
 
 XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
   env = ();
+  ren = ();
   visit (s) {
     case XanaSyntax::TableDef td: {
       if (td is def) {
         tbl = implode(#AST::Table, td.table);
         ast = edit(align(tbl));
-        env["<td.name>"] = ast;
+        n = "<td.name>";
+        if (/^<old:[a-zA-Z0-9]+>-\><new:[a-zA-Z0-9]+>\./ := n) {
+          n = new;
+        }
+        env[n] = ast;
+      }
+    }
+    case XanaSyntax::Id id: {
+      n = "<id>";
+      if (/^<old:[a-zA-Z0-9]+>-\><new:[a-zA-Z0-9]+>\./ := n) {
+        ren[old] = new;
+        insert parse(#XanaSyntax::Id, new);
       }
     }
   }
   
+  println("Ren = <ren>");
   return visit (s) {
+    case XanaSyntax::Id id: {
+      n = "<id>";
+      if (/^<old:[a-zA-Z0-9]+>-\><new:[a-zA-Z0-9]+>\./ := n) {
+        insert parse(#XanaSyntax::Id, new);
+      }
+      if (n in ren) {
+        insert parse(#XanaSyntax::Id, ren[n]);
+      }
+    }
     case XanaSyntax::TableDef td: {
       if (td is view) {
         tname = "<td.name>";
@@ -43,7 +65,8 @@ XanaSyntax::Sheet transform(XanaSyntax::Sheet s) {
         }
       }
       else if (td is def) {
-        src = trim(ppTable(env["<td.name>"], td.table@\loc.begin.column));
+        tname = "<td.name>";
+        src = trim(ppTable(env[tname], td.table@\loc.begin.column));
         td.table = parse(#XanaSyntax::Table, src);
         insert td;
       }

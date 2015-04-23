@@ -40,7 +40,7 @@ syntax TableDef
 syntax Repl
   = empty: ^ "\>"
   | command: ^ "\>" Expr cmd "."
-  | right result: Repl hist "=\>" Expr result Repl prompt
+  | left result: Repl hist "=\>" Expr result Repl prompt
   ;
 
 syntax Table 
@@ -160,6 +160,7 @@ lexical Float
 
 lexical Id
   = ([a-z A-Z 0-9 _] !<< [a-z A-Z][a-z A-Z 0-9 _]* !>> [a-z A-Z 0-9 _]) \ Keywords
+  | Id "-\>" Id "."
   ;
 
 lexical Comment
