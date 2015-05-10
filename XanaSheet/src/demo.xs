@@ -1,12 +1,27 @@
 
 /*
- A demo 
- */
+ A demo (Live text) Ted  */
   
-table grades = 
-  #  A   / B    / C               / D          
-  1: Lab | Exam | Avg             | Grade      
-  2: 7   | 5    | = (A2 + B2) / 3 | = round(C2)
-  3: 3   | 6    | = (A3 + B3) / 2 | = round(C3)
-  4: 9   | 10   | = (A4 + B4) / 2 | = round(C4).
+table marks = #  A / B            / C    / D               / E          
+              1:   | Lab          | Exam | Avg             | Grade      
+              2:   | 7            | 7    | = (B2 + C2) / 2 | = round(D2)
+              3:   | 6            | 7    | = (B3 + C3) / 2 | = round(D3)
+              4:   | 6            | 7    | = (B4 + C4) / 2 | = round(D4)
+              5:   | 9            | 10   | = (B5 + C5) / 2 | = round(D5)
+              6:   | = sum(B1:B5) |      |                 |.
  
+
+test marks E2 * 2 == B2 + C2
+
+repl for marks
+> A2 + B2.
+=> 7.0
+>B2 + B2.
+=> 7.0
+>B5 * C5.
+=> 90.
+>round(B2/3).
+=> 2.
+>B2/3.
+=> 2.333333333
+>
