@@ -15,9 +15,8 @@ abstract: |
   
 fontsize: 11pt
 geometry: margin=2cm
-fontfamily: libertine
-fontfamily: inconsolata
-mainfont: Linux Libertine O
+fontfamily: mathpazo,mathabx
+mainfont: Palatino
 monofont: Inconsolata
 bibliography: references.bib
 ...
@@ -184,7 +183,8 @@ An application most similar to our work is presented in [@InostrozaVdSE], where 
 
 *Transclusion*:  Ted Nelson's concept of _transclusion_ [@Nelson65] is a form of "reference by inclusion" where transcluded data is presented through a "live" view: whenever the transcluded content is updated, the views are updated as well.
 Our origin relation provides a similar hyper-linking between cells. 
-But unlike in the case of transclusion, the relation is bidirectional: changes to the original are propagated forward, but changes to copies (references) are also propagated backwards (and then forwards again). 
+But unlike in the case of transclusion, the relation is bidirectional: changes to the original are propagated forward, but changes to copies (references) are also propagated backwards (and then forwards again).
+A similar concept is used in Subtext, where copying is the primary mechanism for abstraction [@Subtext].
 
 *Clone tracking* in software: Godfrey and Tu [@Godf2002] proposed a method called _origin analysis_ which is a related to both clone detection and the above described origin tracking, but aims at deciding if a program entity was newly introduced or whether it if it should more accurately be viewed as a renamed, moved, or otherwise changed version of an previously existing entity. This laid the ground for a tool called _CloneTracker_ that "can automatically track clones as the code evolves, notify developers of modifications to clone
 regions, and support simultaneous editing of clone regions." [@Dual2007].
