@@ -14,7 +14,7 @@ abstract: |
   Adding abstraction however, introduces indirection and thus cognitive distance. In this paper we propose an alternative: copy-paste tracking. Tracking copies that spreadsheet users make, allows them to directly edit copy-pasted formulas, but instead of changing only a single instance, the changes will be propagated to all formulas copied from the same source. As a result, spreadsheet users will enjoy the benefits of abstraction without its drawbacks.
   
 fontsize: 11pt
-geometry: margin=2cm
+geometry: margin=1.5cm
 fontfamily: mathpazo,mathabx
 mainfont: Palatino
 monofont: Inconsolata
