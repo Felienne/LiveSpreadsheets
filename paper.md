@@ -204,7 +204,7 @@ Existing research has tried to improve spreadsheets by introducing abstractions 
 In this paper we propose XanaSheet: copy-paste tracking as way to both have our cake and eat it too. Instead of introducing another level of indirection, copy-paste tracking supports editing classes of formulas originating at the same source, all at once. 
 As a result, we get the benefits of abstraction (reuse, sharing, "single-point-of-change"), without the incurring the burden of cognitive distance. 
 
-*Outlook* Duplication of knowledge is ubiquitous is computing. Copy-paste tracking can generalized to a broader scope by seeing it as an example of abstractions that are presented to the user in a materialized, expanded, unrolled, referenced, or instantiated state.
+*Outlook* Duplication of knowledge is ubiquitous is computing. Copy-paste tracking can  be generalized to a broader scope by seeing it as an example of abstractions that are presented to the user in a materialized, expanded, unrolled, referenced, or instantiated state.
 The relation between such views and the original is often many-to-one and the views are often read only. 
 Copy-paste tracking could provide a model to make such user views of abstractions editable. 
 Thus, copy-paste tracking in its most general form supports direct manipulation in interactive systems and allows users to maintain abstractions through their multiple concretizations.
