@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Spreadsheets: the original live coding environment. Lessons learnt and steps forward.</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="css/iclc.css" type="text/css" />
+</head>
+<body>
+<div id="header">
+<h1 class="title">Spreadsheets: the original live coding environment. Lessons learnt and steps forward.</h1>
+<ul id="authorlist">
+<li>true</li>
+<li>true</li>
+</ul>
+</div>
+
+<h2 class="abstract">Abstract</h2>
+<div id="abstract">
+<p>Replace this text with a 100-250 word abstract. You'll find it in the 'metadata block' at the top of your markdown document), be sure that each line of the abstract is indented.</p>
+</div>
+
+<h1 id="introduction"><span class="header-section-number">1</span> Introduction</h1>
+<p>Spreadsheet systems can easily be considered the most successful form of programming. Winston <span class="citation">(Winston 2001)</span> estimates that 90% of all analysts in industry perform calculations in spreadsheets. Spreadsheet users perform a range of diverse tasks with spreadsheets, from inventory administration to educational applications and from scientific modelling to financial systems. The financial business is a domain where spreadsheets are especially prevailing. Panko<span class="citation">(Panko 2006)</span> estimates that 95% of U.S. firms, and 80% in Europe, use spreadsheets in some form for financial reporting.</p>
+<p>The success of spreadsheets is of course due to many different factors, the ubiquitous Microsoft Office suite within companies provides almost every office worker with a version of Excel, the world's most popular spreadsheet system. However, researchers have also argued that the liveness of spreadsheets has contributed to the widespread success of spreadsheets <span class="citation">(Hermans 2013)</span>.</p>
+<h1 id="live-programming-in-spreadsheets"><span class="header-section-number">2</span> Live programming in Spreadsheets</h1>
+<p>Spreadsheets are formally defined as a collection of worksheets, which in turn can contain cells. These cells can contain values, like numbers or text, or formulas, with calculations and cell references. In addition to these basic operations, many spreadsheet systems also allow users to create charts, graphs and pivot tables. When a user enters or updates a formula, the result is immediately shown to the user. Also, all cells depending on the changed formula are updated.</p>
+<p>From interviews with users we know that this <em>liveness</em> is important to users. They often start building a spreadsheet with the end goal in mind, and manipulate the formulas until the obtain the result they want.</p>
+<h1 id="moving-forward"><span class="header-section-number">3</span> Moving forward</h1>
+<h2 id="more-power-for-spreadsheets"><span class="header-section-number">3.1</span> More power for spreadsheets</h2>
+<h3 id="user-defined-functions-in-formula-syntax"><span class="header-section-number">3.1.1</span> User-defined functions in formula syntax</h3>
+<p>Despite their widespread success, there are some limitations to spreadsheets. Previous work <span class="citation">(Jones, Blackwell, and Burnett 2003)</span> has described the idea of allowing users to add user-defined functions (UDFs) with spreadsheet formula syntax. This seems to be a powerful addition that unfortunately has not made it so common spreadsheet implementations yet. Of course, UDFs can already be implemented with Visual Basic for Applications in Excel, however, this breaks the concept of liveness as the VBA code has to be compiled. Furthermore, also the directness property <span class="citation">(Maloney and Smith 2002)</span> is somewhat lost as the VBA code has to be edited in a separate window.</p>
+<h3 id="loops-and-fixed-points"><span class="header-section-number">3.1.2</span> Loops and fixed points</h3>
+<p>While it is possible to have spreadsheet systems like Excel calculate fix points, currently, users need to enable special settings to achieve this, as shown in Figure 1. Spreadsheet systems would be more powerful if such features would be expressible with formula syntax rather that with options.</p>
+<div class="figure">
+<img src="images/iterative.PNG" alt="Excel 2010 for Windows showing the property which enables iterative calculation" />
+<p class="caption"><em>Excel 2010 for Windows showing the property which enables iterative calculation</em></p>
+</div>
+<h2 id="spreadsheets-properties-for-regular-languages"><span class="header-section-number">3.2</span> Spreadsheets properties for regular languages</h2>
+<h1 id="related-work"><span class="header-section-number">4</span> Related Work</h1>
+<p>Related work for this paper comes in different categories, that we will summarize in this section.</p>
+<h2 id="improving-spreadsheets"><span class="header-section-number">4.1</span> Improving spreadsheets</h2>
+<p>First of all, there are other papers aiming at improving spreadsheets, for instance by raining the level of abstraction. An example of this is the work of Abraham <em>et al.</em> for example, have developed a system called ClassSheets <span class="citation">(Abraham et al. 2005, Enge2005)</span> with which the design of a spreadsheet can be described. From this specification, spreadsheets can be generated. A related effort is the work of Cunha, which transforms a spreadsheet into a database by analyzing functional dependencies<span class="citation">(Cunha, Saraiva, and Visser 2009)</span>. While evaluations showed that this systems makes users more efficient and effective, the authors also conclude that ``that deeper insight on the spreadsheet models is required to maximize effectiveness''<span class="citation">(Beckwith et al. 2011)</span>.</p>
+<p>Other directions for improvement have been the by enhancing the interface with units of calculation. Abraham and Erwig for example, have written a series of articles on unit inference[<span class="citation">Abraham and Erwig (2004)</span>, <span class="citation">Abraham and Erwig (2006)</span>, <span class="citation">Abraham, Erwig, and Andrew (2007)</span>}. Their units form a type system based on values in the spreadsheet, which is subsequently used to determine whether all cells in a column or row have the same type, improving the safety of the spreadsheet under test. Ahmad <em>et al.</em> <span class="citation">(Ahmad et al. 2003)</span> also created a system to annotate spreadsheets, however their approach requires users to indicate the types of fields themselves, hence significantly chaining the user experience.</p>
+<p>Finally, there are related works that aim to improve spreadsheets by adding various forms of error and 'smell' detection. We ourselves have worked on spreadsheet smells in previous work <span class="citation">(Hermans, Pinzger, and Deursen 2012a,<span class="citation">Hermans, Pinzger, and Deursen (2012b)</span>)</span>. In those papers we have explored both spreadsheet smells at the low level of formulas as in a spreadsheets structure. Recently, other work on spreadsheet smells has been published<span class="citation">(Cunha et al. 2012)</span> that aims to find smells in values, such as typographical errors and values that do not follow the normal distribution. Related is the recent work by Barowy _et al.__ who created CheckCell, a data debugging tool that finds errors or suspicious values in Excel <span class="citation">(Barowy, Gochev, and Berger 2014)</span>.</p>
+<p>While all the above directions for improvement have their merits, demonstrated with empirical evidence, they do not specifically focus on retaining or even improving the 'live' properties of spreadsheets like we propose.</p>
+<h2 id="improving-spreadsheets-1"><span class="header-section-number">4.2</span> Improving spreadsheets</h2>
+<p>Another category of related work explores the possibility of transferring live properties, as common in spreadsheets....</p>
+<h1 id="conclusion"><span class="header-section-number">5</span> Conclusion</h1>
+<p>This paper describes the liveness properties of spreadsheets and how they contribute to the mainstream success of spreadsheets. In addition, directions are presented to both move spreadsheets forward and to incorporate the success factors into regular programming languages. as such, the contributions of this paper are as follows:</p>
+<ul>
+<li>An detailed overview of <em>live</em> properties of spreadsheets and their impact on users</li>
+<li>Two distinct directions for the advancement of spreadsheet live programming success:
+<ol style="list-style-type: decimal">
+<li>More power for spreadsheets</li>
+<li>Spreadsheets properties for regular languages</li>
+</ol></li>
+</ul>
+<div class="references">
+<h1 id="references" class="unnumbered">References</h1>
+<p>Abraham, R., and M. Erwig. 2006. “Inferring Templates from Spreadsheets.” In <em>Proc. of ICSE ’06</em>, 182–91.</p>
+<p>Abraham, R., M. Erwig, and S. Andrew. 2007. “A Type System Based on End-User Vocabulary.” In <em>Proc. of VL/HCC ’07</em>, 215–22. doi:<a href="http://dx.doi.org/http://dx.doi.org/10.1109/VLHCC.2007.6">http://dx.doi.org/10.1109/VLHCC.2007.6</a>.</p>
+<p>Abraham, Robin, and Martin Erwig. 2004. “Header and Unit Inference for Spreadsheets Through Spatial Analyses.” In <em>Proc. of VL/HCC ’04</em>, 165–72.</p>
+<p>Abraham, Robin, Martin Erwig, Steve Kollmansberger, and Ethan Seifert. 2005. “Visual Specifications of Correct Spreadsheets.” In <em>Proc. of VL/HCC ’05</em>, 189–96. IEEE Computer Society.</p>
+<p>Ahmad, Yanif, Tudor Antoniu, Sharon Goldwater, and Shriram Krishnamurthi. 2003. “A Type System for Statically Detecting Spreadsheet Errors.” In <em>Proc. of ASE ’03</em>, 174–83.</p>
+<p>Barowy, Daniel W., Dimitar Gochev, and Emery D. Berger. 2014. “CheckCell: Data Debugging for Spreadsheets.” In <em>Proceedings of the 2014 ACM International Conference on Object Oriented Programming Systems Languages &amp;#38; Applications</em>, 507–23. OOPSLA ’14. Portland, Oregon, USA: ACM.</p>
+<p>Beckwith, Laura, J<span>á</span>come Cunha, Jo<span>ã</span>o Paulo Fernandes, and Jo<span>ã</span>o Saraiva. 2011. “An Empirical Study on End-Users Productivity Using Model-Based Spreadsheets.” In <em>Proc. of the EuSpRIG ’11</em>, 87–100.</p>
+<p>Cunha, J<span>á</span>come, Jo<span>ã</span>o Paulo Fernandes, Jorge Mendes, and Jo<span>ã</span>o Saraiva Hugo Pacheco. 2012. “Towards a Catalog of Spreadsheet Smells.” In <em>Proc. of ICCSA’12</em>. LNCS.</p>
+<p>Cunha, J<span>á</span>come, Jo<span>ã</span>o Saraiva, and Joost Visser. 2009. “Discovery-Based Edit Assistance for Spreadsheets.” In <em>Proc. of VL/HCC ’09</em>, 233–37.</p>
+<p>Hermans, Felienne. 2013. “Analyzing and Visualizing Spreadsheets.” PhD thesis, Delft University of Technology.</p>
+<p>Hermans, Felienne, Martin Pinzger, and Arie van Deursen. 2012a. “Detecting and Visualizing Inter-Worksheet Smells in Spreadsheets.” In <em>Proceedings of the 2012 International Conference on Software Engineering</em>, 441–51. IEEE Press.</p>
+<p>Hermans, Felienne, Martin Pinzger, and Arie van Deursen. 2012b. “Detecting Code Smells in Spreadsheet Formulas.” In <em>Proc. of ICSM ’12</em>, 409–18.</p>
+<p>Jones, Simon Peyton, Alan Blackwell, and Margaret Burnett. 2003. “A User-Centred Approach to Functions in Excel.” In <em>In Proceedings of the Eighth ACM SIGPLAN International Conference on Functional Programming</em>, 165–76. ICFP ’03. New York, NY, USA: ACM. doi:<a href="http://dx.doi.org/10.1145/944705.944721">10.1145/944705.944721</a>.</p>
+<p>Maloney, John H., and Randall B. Smith. 2002. “Directness and Liveness in the Morphic User Interface Construction Environment.” In <em>ACM Symposium on User Interface Software and Technology</em>, 21–28. <a href="http://dblp.uni-trier.de/db/conf/uist/uist1995.html#MaloneyS95" class="uri">http://dblp.uni-trier.de/db/conf/uist/uist1995.html#MaloneyS95</a>.</p>
+<p>Panko, R. 2006. “Facing the Problem of Spreadsheet Errors.” <em>Decision Line</em> 37 (5). Decision Sciences Institute.</p>
+<p>Winston, W.L. 2001. “Executive Education Opportunities.” <em>OR/MS Today</em> 28 (4). Lionheart Publishing.</p>
+</div>
+</body>
+</html>
