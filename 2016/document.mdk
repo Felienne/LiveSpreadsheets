@@ -1,4 +1,4 @@
-Title         : Bringing Spreadsheetlike Liveness to the IDE
+Title         : Live Literals: Liveness in Source Code
 Author        : You
 Affiliation   : Research institute
 Email         : you@bar.com
@@ -17,30 +17,28 @@ Doc class     : [10pt]article
 [TITLE]
 
 ~ Abstract
-Spreadsheet systems are live programming environments. Both the data and the code are right in front you, and if you edit either of them, the effects are immediately visible. Unfortunately, spreadsheets lack mechanisms for abstraction, such as classes, function definitions etc. Programming languages excel at abstraction, but most mainstream languages or IDEs don't support the interactive, live feedback loop of spreadsheets. As a result, exploring and testing of code is cumbersome and indirect. In this paper we explore two approaches to bring both worlds closer together. First we show how a spreadsheet-like user interface might be used for live unit testing. Second, we push this model into the source code itself, by introducing *live literals* which are updated automatically when the code or the data is changed. Finally, we show how the concept of live literals can be generalized to implement spreadsheets properly, right from within the source code.
+The idea of liveness to improve the experience of programming, been first proposed by Maloney and Smith, has received research attention in recent times. Most of these initiatives however bring liveness to the IDE, but not to the source code. In this paper we propose *live literals*, live updating literals right within the source code. Live literals are updated automatically when the code or the data is changed. 
+Live literals have all the benefits of being live, like diminish the cognitive distance between the code and its execution, but they also have all the benefits of source code. Source code can easily be shared, diffed and version controlled.
+We illustrate live literals with three example, implementing a spreadsheetlike grades calculation, a test scenario and *probes*. 
+
+
 ~
 
 # Introduction     { #sec-intro }
 
-Spreadsheets are very popular end-user programming tools in many different domains. Especially in the financial domain, spreadsheets are ubiquitous. In 2004, the International Data Corporation interviewed 118 business leaders and found that 85\% were using spreadsheets in financial reporting and forecasting [@Panko2008].  Financial intelligence firm CODA reported in 2008 that 95\% of all U.S. companies use spreadsheets for financial reporting @Panko2008. In a survey held in 2003 by the US Bureau of Labor Statistics@BLS2003, over 60\% of 77 million surveyed workers in the US reported using spreadsheets, making this the third most common use of computers, after email and word processing. A more recent survey among 95 companies world-wide, placed spreadsheets fourth, after email, browsing and word processing, accounting for 7.4\% of computer time @Wellnomics2007. The Dutch Bureau of Statistics investigates computer literacy among Dutch civilians every year, and has reported a rise in people able to use formulas in spreadsheets from 44\% in 2006 to 54\% in 2013 @CBS2013.
+Liveness is the property that without compiling or running, a system will update **reference?**
 
-Recently, it has been argued that spreadsheets are not "end-user programming" they are simply programming. Spreadsheet are so similar to source code *add cites here*
+A related property is directness, defined as 'the feeling that a user can directly manipulate objects' @maloney_directness_1995. 
 
-Spreadsheets are a very successful example of end-user programming, but more specifically, spreadsheets are also _live_ programming. Not only do spreadsheets have _liveness_ meaning that their interface is continuously updated, they also directness: the feeling that a user can directly manipulate objects @maloney_directness_1995. In spreadsheets, a user knows where to edit a formula, they simply click it, there is no 'code behind' to navigate to, for example.
+An example of both properties are spreadsheets, a spreadsheet user can just click a value or formula and update it right in the same spot (directness) and when changing a value, all formulas depending on it will update too (liveness) Unfortunately, literals in source code have neither of these properties. Values are often shared outside of source code, violating directness, and when we change source code, they are not updating, violating liveness. 
 
-In this paper we will describe two distinct approaches to bring the world of spreadsheets closer to programming and vice versa. Firstly, we introduce TrueGrid. TrueGrid is a spreadsheetlike interface designed for programmers, it combines a grid with data with programming in JavaScript. This way, as a programmer you can inspect data and play with implementation, before having to write interfaces or even unit tests. We envision this is a useful tool very early in the development process, when you have some data and only a vague direction on where the project is going. 
+There have been several initiatives most of these initiatives however bring liveness to the IDE, but not to the source code. **references**
 
-**Tijske: jij hier!**
-Secondly, we liveness into the source code, by introducing *live literals* which are updated automatically when the code or the data is changed. 
+Our approach is different, as we propose to update literals in source code live, dubbed *live literals*
 
-Finally, we show how the concept of live literals can be generalized to implement spreadsheets proper, right from within the source code.
+Live literals have all the benefits of being live, like diminish the cognitive distance between the code and its execution, but they also have all the benefits of source code. Source code can easily be shared, diffed and version controlled.
 
-All in all, this paper presents the following new ideas:
-
-1. A spreadsheetlike interface to program data
-2. Live updating variables within source code
-3. A combination of both ...
-
+We illustrate live literals with three example, implementing a spreadsheetlike grades calculation, a test scenario and *probes*. 
 
 # Background     { #background }
 
@@ -62,49 +60,122 @@ Maloney and Smith describe directness as the fact that a user can  _``can initia
 
 This almost exactly describes the interface of a spreadsheet. Instead of navigating to a code behind, a class or an object, spreadsheet users have all ingredients: data, metadata and calculations, in one view, and can access them with one click. 
 
-# Grids in the IDE     { #tg }
+# Live Literals    { #tg }
 
-In this paper, we will describe two approaches to bring programming and spreadsheet closer together. Firstly, we present an approach called TrueGrid, which has a spreadsheetlike grid interface that can be programmed using JavaScript, as shown in Figure [#fig-TG] and in the embedded code below.
+The idea of live literals is to have literals in source that change as you change their definition or input values, much like a spreadsheet. Consider this example **Ik wil nu een pagina met alleen zoiets erop**
 
-**Look an embedded live version of TrueGrid! (Does not work in preview, but click Generate HTML and open the file from DropBox in the browser) **
+``` javascript
+cell(function square(num) {
+  return (num*num) ;
+});
+
+var grades = sheet([
+ {num: 12, square: 144},
+ {num: 1, square: 1},
+]);
+```
+
+**Dat voorbeeld boven moet dan hier live komen **
 
 ~ HtmlOnly
-<iframe src="http://www.felienne.com/TrueGrid/simpleGrid/"  width="100%" height="450"></iframe>
+<iframe src=http://homepages.cwi.nl/~storm/livelit/livelit.html"  width="100%" height="450"></iframe>
 ~
 
-~Figure { #fig-TG; caption:"Grid and JavaScript input (**to be updated**)"; page-align:here }
+The value of is updated when 1) the num input is changed or 2) the implementation of square is changed. 
 
-![TG]
-~
-[TG]: images/TG.PNG "TG" { width:auto; max-width:90% }
+## Implementation
 
-Using TrueGrid, a programmer you can inspect data and play with an initial implementation, before having to write interfaces or even unit tests. We envision this is a useful tool very early in the development process, when you have some data and only a vague idea of where the project is going. 
+**How zit dit in elkaar dan?**
 
-## Use Case
-We envision programmers using TrueGrid when building programs for very data-driven programs. For example, you have a list of number that you want to manipulate (We need a better example here)
+# Examples
 
-Then, before even writing code or tests, the programmers want to explore the dataset a bit, for example, 
+To illustrate the usefulness of Live Literals, we show three different examples:
 
-## Moving to 'real' code
+## Solving spreadsheet problems
 
-After a TrueGrid session, the programmer can extract the methods and tests from it to move on to more structured programming.
+Spreadsheets are often used to do simple calculations in which data is summed or multiplied, both within rows are within columns. The benefits of using spreadsheets is that they are easy to use, and live. With Live Literals we can implement such spreadsheet problems.
 
+In the example below, we want to calculate the average of students in our class, as well as the average of all students.
 
-
-<!--( For when we need Javascript syntax highlighting: **madoko so nice**
 ``` javascript
-function hello() {
-  return "hello world!"
+cell(function avg(sheet, lab, exam) {
+  return (lab + exam) / 2;
+});
+
+cell(function classAvg(sheet) {
+  return avg('avg', sheet);
+});
+
+var grades = sheet([
+ {student: 'Felienne', lab: 32343, exam: 9, avg: 16176},
+ {student: 'Tijs', lab: 10, exam:7.7, avg: 8.85},
+ {student: 'Piet', lab: 4, exam:7.7, avg: 5.85},
+ {classAvg: 5396.900000000001}
+]);
+```
+
+## Testing methods
+A benefit of live programming system is that it is easy to detect mistakes, as the data as well as the code are in one view. With Live Literals, we can also implement light weight unit tests, by adding a 'should' field to classes. A result is then added indicating whether or not the method fulfills the specification.
+
+**ja, maar hoe werkt dat eigenlijk? Dat is conceptueel nog anders dan de literals want je voegt iets toe, even toelichten hier**
+
+``` javascript
+function add(x, y) {
+  test([
+   {x: 1, y: 3, should: 4},
+   {x: 1, y: 5, result: 6}
+  ]);
+  return x + y;
 }
 ```
-)--> 
+
+## Probes
+
+**Hier een korte samenvatting van Sean's paper**
+
+Live Literals enabke brobes by... 
+
+``` javascript
+function binarySearch(key, array) {
+    run({key: 'd', array: ['a', 'b', 'c', 'e', 'f']});
+
+    var low = 0; 
+    var high = array.length - 1; 
+
+    var result = -1;
+    while (low <= high) {
+        p(low, [0,3]);
+        p(high, [4,4]);
+        
+        var mid = Math.floor((low + high)/2);
+        var value = array[mid];
+
+        p(mid, [2,3]);
+        p(value, ["c","e"]);
+
+        if (value < key) {
+            low = mid + 1; 
+        }
+        else if (value > key) {
+            high = mid - 1;
+        }
+        else {
+            result = mid;
+            break;
+        }
+    }
+    p(result, [-1])
+    return result;
+}
+```
 
 
 
 
-# Live Literals
 
-# Sheet Literals
+
+
+
 
 # Related Work
 
