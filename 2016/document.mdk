@@ -133,7 +133,7 @@ function add(x, y) {
 
 **Hier een korte samenvatting van Sean's paper**
 
-Live Literals enabke brobes by... 
+Live Literals enable probes by... 
 
 ``` javascript
 function binarySearch(key, array) {
